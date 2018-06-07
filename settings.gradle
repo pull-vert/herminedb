@@ -1,0 +1,4 @@
+rootProject.name = 'herminedb'
+
+include 'herminedb-core'
+include 'herminedb-driver'

@@ -1,0 +1,44 @@
+allprojects {
+    group 'org.hermine'
+    version '0.0.1-SNAPSHOT'
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+    }
+
+    sourceCompatibility = 10
+    targetCompatibility = 10
+
+
+    dependencies {
+        compile('org.apache.logging.log4j:log4j-api:2.11.0')
+        compile('org.apache.logging.log4j:log4j-core:2.11.0')
+
+        testCompile('org.junit.jupiter:junit-jupiter-api:5.2.0')
+        testRuntime('org.junit.jupiter:junit-jupiter-engine:5.2.0')
+        testRuntime('org.apache.logging.log4j:log4j-jul:2.11.0')
+    }
+
+    test {
+        useJUnitPlatform()
+
+        systemProperty 'java.util.logging.manager', 'org.apache.logging.log4j.jul.LogManager'
+
+        testLogging {
+            events "passed", "skipped", "failed"
+        }
+
+        reports {
+            html.enabled = true
+        }
+    }
+}
+
+wrapper {
+    gradleVersion = '4.8'
+    distributionType = Wrapper.DistributionType.ALL
+}
