@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 module org.herminedb {
-
+    requires jdk.incubator.adba;
+//    exports org.hermine.db;
 }
