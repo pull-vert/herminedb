@@ -17,7 +17,6 @@ subprojects {
     dependencies {
         compile('org.apache.logging.log4j:log4j-api:2.11.0')
         compile('org.apache.logging.log4j:log4j-core:2.11.0')
-        compile('jdk.incubator:adba:1.0')
 
         testCompile('org.junit.jupiter:junit-jupiter-api:5.2.0')
         testRuntime('org.junit.jupiter:junit-jupiter-engine:5.2.0')
@@ -37,8 +36,14 @@ subprojects {
             html.enabled = true
         }
     }
+}
 
-//    https://guides.gradle.org/building-java-9-modules/#step_2_produce_java_9_modules_for_all_subprojects
+configure(subprojects.findAll { it.name.startsWith("herminedb-") }) {
+    dependencies {
+        compile('jdk.incubator:adba:1.0')
+    }
+
+    //    https://guides.gradle.org/building-java-9-modules/#step_2_produce_java_9_modules_for_all_subprojects
     afterEvaluate {
         repositories {
             jcenter()

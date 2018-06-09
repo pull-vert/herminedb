@@ -1,0 +1,21 @@
+plugins {
+    id "io.morethan.jmhreport" version "0.7.0"
+}
+
+dependencies {
+    compile project(':herminedb-core')
+    compile project(':herminedb-driver')
+
+    compile('org.openjdk.jmh:jmh-generator-annprocess:1.19')
+}
+
+jmhReport {
+    jmhResultPath = project.file("$buildDir/jmh-result.json")
+    jmhReportOutput = project.file(buildDir)
+}
+
+task runJMH(type: JavaExec) {
+    main = "org.hermine.jmh.HermineBenchmark"
+    classpath sourceSets.main.runtimeClasspath
+}
+tasks.runJMH.finalizedBy tasks.jmhReport
