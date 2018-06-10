@@ -15,5 +15,5 @@
  */
 module org.herminedb {
     requires jdk.incubator.adba;
-//    exports org.hermine.db;
+    exports org.hermine.db;
 }
