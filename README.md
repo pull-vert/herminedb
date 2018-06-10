@@ -15,4 +15,14 @@ $ jar --create --file=jdk.incubator.adba.jar --module-version=1.0 -C mods/jdk.in
 $ mvn install:install-file -Dfile=jdk.incubator.adba.jar -DgroupId=jdk.incubator -DartifactId=adba -Dversion=1.0 -Dpackaging=jar
 ```
 
-Clone Hermine from [GitHub](https://github.com/pull-vert/herminedb). Both are modularized with Jigsaw. Hermine depends on ADBA. 
+Clone Hermine from [GitHub](https://github.com/pull-vert/herminedb). Both are modularized with Jigsaw. Hermine depends on ADBA.
+
+##  Modules
+Main modules
+* herminedb-engine is the database itself
+* hermine-driver is the java adba asynchronous driver
+
+Other modules
+* hermine-jmh contains microbenchmarks to test performances of Hermine DB
+* [hermine-playground](hermine-playground/README.md) is a free place to tests stuff
+
