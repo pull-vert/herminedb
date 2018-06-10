@@ -1,5 +1,6 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2018 HermineDB's author : Frédéric Montariol,
+ * and explicitly declared author of this file if provided.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,11 +67,20 @@ public abstract class HermineDB {
     public interface Builder {
 
         /**
+         * Sets the TCP port HermineDB server will listen to
+         *
+         * @param dbPort HermineDB TCP port
+         * @return this builder
+         * @throws IllegalArgumentException if the given priority is out of range
+         */
+        Builder dbPort(int dbPort);
+
+        /**
          * Returns a new {@link HermineDB} built from the current state of this
          * builder.
          *
          * @return a new {@code HermineDB}
          */
-        public HermineDB build();
+        HermineDB build();
     }
 }

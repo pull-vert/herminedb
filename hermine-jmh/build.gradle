@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     compile project(':herminedb-engine')
-    compile project(':herminedb-driver')
+//    compile project(':herminedb-driver')
 
     compile('org.openjdk.jmh:jmh-generator-annprocess:1.21')
 }

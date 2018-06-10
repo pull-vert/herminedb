@@ -1,5 +1,6 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2018 HermineDB's author : Frédéric Montariol,
+ * and explicitly declared author of this file if provided.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,5 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import jdk.incubator.sql2.DataSourceFactory;
+import org.hermine.db.driver.HermineDataSourceFactory;
+
 module org.herminedb.driver {
+    requires jdk.incubator.adba;
+    exports org.hermine.db.driver;
+    provides DataSourceFactory with HermineDataSourceFactory;
 }

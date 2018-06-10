@@ -1,0 +1,145 @@
+/*
+ * Copyright 2018 HermineDB's author : Frédéric Montariol,
+ * and explicitly declared author of this file if provided.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.hermine.internal.db.driver;
+
+import jdk.incubator.sql2.*;
+
+import java.time.Duration;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Flow;
+import java.util.function.Consumer;
+import java.util.logging.Logger;
+import java.util.stream.Collector;
+
+class HermineOperationGroupImpl<S, T> extends HermineOperation<T> implements OperationGroup<S, T> {
+
+    HermineOperationGroupImpl(HermineConnectionImpl conn, HermineOperationGroupImpl<? super T, ?> group) {
+        super(conn, group);
+    }
+
+    @Override
+    public HermineOperationGroupImpl<S, T> parallel() {
+        return this;
+    }
+
+    @Override
+    public HermineOperationGroupImpl<S, T> independent() {
+        return this;
+    }
+
+    @Override
+    public HermineOperationGroupImpl<S, T> conditional(CompletionStage<Boolean> condition) {
+        return this;
+    }
+
+    @Override
+    public Submission<T> submitHoldingForMoreMembers() {
+        return null;
+    }
+
+    @Override
+    public OperationGroup<S, T> releaseProhibitingMoreMembers() {
+        return null;
+    }
+
+    @Override
+    public HermineOperationGroupImpl<S, T> collect(Collector<S, ?, T> c) {
+        return this;
+    }
+
+    @Override
+    public Operation<S> catchOperation() {
+        return null;
+    }
+
+    @Override
+    public <R extends S> ArrayCountOperation<R> arrayCountOperation(String sql) {
+        return null;
+    }
+
+    @Override
+    public <R extends S> ParameterizedCountOperation<R> countOperation(String sql) {
+        return null;
+    }
+
+    @Override
+    public Operation<S> operation(String sql) {
+        return null;
+    }
+
+    @Override
+    public <R extends S> OutOperation<R> outOperation(String sql) {
+        return null;
+    }
+
+    @Override
+    public <R extends S> ParameterizedRowOperation<R> rowOperation(String sql) {
+        return null;
+    }
+
+    @Override
+    public <R extends S> RowProcessorOperation<R> rowProcessorOperation(String sql) {
+        return null;
+    }
+
+    @Override
+    public <R extends S> StaticMultiOperation<R> staticMultiOperation(String sql) {
+        return null;
+    }
+
+    @Override
+    public <R extends S> DynamicMultiOperation<R> dynamicMultiOperation(String sql) {
+        return null;
+    }
+
+    @Override
+    public Operation<TransactionOutcome> endTransactionOperation(Transaction trans) {
+        return null;
+    }
+
+    @Override
+    public <R extends S> LocalOperation<R> localOperation() {
+        return null;
+    }
+
+    @Override
+    public <R extends S> Flow.Processor<Operation<R>, Submission<R>> operationProcessor() {
+        return null;
+    }
+
+    @Override
+    public OperationGroup<S, T> logger(Logger logger) {
+        throw new UnsupportedOperationException("Will use other Logger");
+    }
+
+    // Override all Operation methods
+
+    @Override
+    public HermineOperationGroupImpl<S, T> onError(Consumer<Throwable> handler) {
+        return this;
+    }
+
+    @Override
+    public HermineOperationGroupImpl<S, T> timeout(Duration minTime) {
+        return this;
+    }
+
+    @Override
+    public Submission<T> submit() {
+        return null;
+    }
+}

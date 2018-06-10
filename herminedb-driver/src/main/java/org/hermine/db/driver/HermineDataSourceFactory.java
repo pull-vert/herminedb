@@ -14,27 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.internal.hermine.db;
+package org.hermine.db.driver;
 
-import org.hermine.db.HermineDB;
+import jdk.incubator.sql2.DataSource;
+import org.hermine.internal.db.driver.HermineDataSourceBuilderImpl;
 
-/**
- * An HermineDBFacade is a simple class that wraps an HermineDB implementation
- * and delegates everything to its implementation delegate.
- */
-final class HermineDBFacade extends HermineDB {
-
-    final HermineDBImpl impl;
-
-    /**
-     * Creates an HermineDBFacade.
-     */
-    HermineDBFacade(HermineDBImpl impl) {
-        this.impl = impl;
-    }
+public class HermineDataSourceFactory implements jdk.incubator.sql2.DataSourceFactory {
 
     @Override
-    public String toString() {
-        return impl.toString();
+    public DataSource.Builder builder() {
+        return new HermineDataSourceBuilderImpl();
     }
 }

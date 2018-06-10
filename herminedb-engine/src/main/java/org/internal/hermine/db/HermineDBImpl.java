@@ -1,5 +1,6 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2018 HermineDB's author : Frédéric Montariol,
+ * and explicitly declared author of this file if provided.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +18,10 @@ package org.internal.hermine.db;
 
 import org.hermine.db.HermineDB;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.channels.Selector;
+import java.util.ArrayList;
 
 final class HermineDBImpl extends HermineDB {
 
@@ -52,8 +56,8 @@ final class HermineDBImpl extends HermineDB {
     }
 
     static HermineDBFacade create(HermineDBBuilderImpl builder) {
-        SingleFacadeFactory facadeFactory = new SingleFacadeFactory();
-        HermineDBImpl impl = new HermineDBImpl(builder, facadeFactory);
+        var facadeFactory = new SingleFacadeFactory();
+        var impl = new HermineDBImpl(builder, facadeFactory);
         impl.start();
         assert facadeFactory.facade != null;
         assert impl.facadeRef.get() == facadeFactory.facade;
@@ -70,8 +74,19 @@ final class HermineDBImpl extends HermineDB {
 
     }
 
-    // Main loop for this client's selector
+    // Main loop for this hermine db's selector
     private final static class SelectorManager extends Thread {
 
+        private final Selector selector;
+        private volatile boolean closed;
+        HermineDBImpl owner;
+
+        SelectorManager(HermineDBImpl ref) throws IOException {
+//            super(null, null,
+//                    "HttpClient-" + ref.id + "-SelectorManager",
+//                    0, false);
+            owner = ref;
+            selector = Selector.open();
+        }
     }
 }

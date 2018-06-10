@@ -1,1 +1,9 @@
 ext.moduleName='org.herminedb.driver'
+
+repositories {
+    maven { setUrl("https://dl.bintray.com/pull-vert/adba/") }
+}
+
+dependencies {
+    compile('jdk.incubator:adba:0.01')
+}
