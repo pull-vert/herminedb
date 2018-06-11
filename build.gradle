@@ -1,3 +1,6 @@
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 allprojects {
     group 'org.hermine'
     version '0.0.1-SNAPSHOT'
@@ -19,13 +22,14 @@ subprojects {
 
         testCompile('org.junit.jupiter:junit-jupiter-api:5.2.0')
         testRuntime('org.junit.jupiter:junit-jupiter-engine:5.2.0')
-        testRuntime('org.apache.logging.log4j:log4j-jul:2.11.0')
+        testRuntimeOnly('org.apache.logging.log4j:log4j-jul:2.11.0')
     }
 
     test {
         useJUnitPlatform()
 
         systemProperty 'java.util.logging.manager', 'org.apache.logging.log4j.jul.LogManager'
+//        systemProperty 'log4j2.debug', ''
 
         testLogging {
             events "passed", "skipped", "failed"
@@ -89,12 +93,28 @@ configure(subprojects.findAll { it.name.startsWith("herminedb-") }) {
                         '--add-reads', "$moduleName=org.junit.jupiter.api",
                         '--patch-module', "$moduleName=" + files(sourceSets.test.java.outputDir).asPath,
                 ]
+                def args = jvmArgs
+                def modulePathIndex = args.indexOf('--module-path') + 1
+                def ps = Pattern.quote(System.properties.'path.separator')
+//                def jd = Pattern.quote(file("$buildDir/classes/java/main") as String)
+                def jt = Pattern.quote(file("$buildDir/classes/java/test") as String)
+//                def rd = Pattern.quote(file("$buildDir/resources/main") as String)
+                def rt = Pattern.quote(file("$buildDir/resources/test") as String)
+                args[modulePathIndex] = args[modulePathIndex]
+//                        .replaceFirst(/(?:$ps|^)$rd/, '')
+                        .replaceFirst(/(?:$ps|^)$rt/, '')
+//                        .replaceFirst(/(?:$ps|^)$jd/, Matcher.quoteReplacement(temporaryDir as String))
+                        .replaceFirst(/(?:$ps|^)$jt/, Matcher.quoteReplacement(temporaryDir as String))
+                jvmArgs = args
+                project.sync {
+                    from compileJava
+                    from processResources
+                    into temporaryDir
+                }
                 classpath = files()
             }
         }
     }
-
-//    check.dependsOn jacocoTestReport
 }
 
 wrapper {

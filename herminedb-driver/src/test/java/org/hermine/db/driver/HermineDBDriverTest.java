@@ -17,6 +17,8 @@
 package org.hermine.db.driver;
 
 import jdk.incubator.sql2.DataSourceFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,13 +27,15 @@ public class HermineDBDriverTest {
 
     private static final String FACTORY_NAME = "org.hermine.db.driver.HermineDataSourceFactory";
 
+    private static final Logger logger = LogManager.getLogger(HermineDBDriverTest.class);
+
     /**
      * Verify that DataSourceFactory.forName works. Can't do anything without that.
      */
     @Test
     public void forName() {
-        assertEquals(1, 1);
-//        assertEquals("org.hermine.db.driver.HermineDataSourceFactory",
-//                DataSourceFactory.forName(FACTORY_NAME).getClass().getName());
+        assertEquals("org.hermine.db.driver.HermineDataSourceFactory",
+                DataSourceFactory.forName(FACTORY_NAME).getClass().getName());
+        logger.info("DataSourceFactory.forName class = {}", DataSourceFactory.forName(FACTORY_NAME).getClass().getName());
     }
 }
