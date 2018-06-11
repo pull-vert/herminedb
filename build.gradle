@@ -41,7 +41,7 @@ configure(subprojects.findAll { it.name.startsWith("herminedb-") }) {
     apply plugin: 'jacoco'
 
     jacoco {
-        toolVersion = '0.7.7.201606060606'
+        toolVersion = '0.8.1'
     }
 
     jacocoTestReport {
@@ -94,7 +94,7 @@ configure(subprojects.findAll { it.name.startsWith("herminedb-") }) {
         }
     }
 
-    check.dependsOn jacocoTestReport
+//    check.dependsOn jacocoTestReport
 }
 
 wrapper {
