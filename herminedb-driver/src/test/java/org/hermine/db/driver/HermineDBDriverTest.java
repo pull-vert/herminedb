@@ -14,8 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.herminedb.driver {
-    requires jdk.incubator.adba;
-    exports org.hermine.db.driver;
-    provides jdk.incubator.sql2.DataSourceFactory with org.hermine.db.driver.HermineDataSourceFactory;
+package org.hermine.db.driver;
+
+import jdk.incubator.sql2.DataSourceFactory;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class HermineDBDriverTest {
+
+    private static final String FACTORY_NAME = "org.hermine.db.driver.HermineDataSourceFactory";
+
+    /**
+     * Verify that DataSourceFactory.forName works. Can't do anything without that.
+     */
+    @Test
+    void forName() {
+        assertEquals("org.hermine.db.driver.HermineDataSourceFactory",
+                DataSourceFactory.forName(FACTORY_NAME).getClass().getName());
+    }
 }

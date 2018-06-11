@@ -38,6 +38,18 @@ subprojects {
 }
 
 configure(subprojects.findAll { it.name.startsWith("herminedb-") }) {
+    apply plugin: 'jacoco'
+
+    jacoco {
+        toolVersion = '0.7.7.201606060606'
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled = true
+            html.enabled = true
+        }
+    }
 
     //    https://guides.gradle.org/building-java-9-modules/#step_2_produce_java_9_modules_for_all_subprojects
     afterEvaluate {
@@ -81,6 +93,8 @@ configure(subprojects.findAll { it.name.startsWith("herminedb-") }) {
             }
         }
     }
+
+    check.dependsOn jacocoTestReport
 }
 
 wrapper {
