@@ -22,6 +22,9 @@ import org.hermine.internal.db.driver.HermineDataSourceBuilderImpl;
 
 public class HermineDataSourceFactory implements DataSourceFactory {
 
+    // For tests only
+    HermineDataSourceFactory() {}
+
     @Override
     public DataSource.Builder builder() {
         return new HermineDataSourceBuilderImpl();
