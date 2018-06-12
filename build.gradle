@@ -20,6 +20,7 @@ subprojects {
         compile('org.apache.logging.log4j:log4j-api:2.11.0')
         compile('org.apache.logging.log4j:log4j-core:2.11.0')
 
+        testCompile('org.assertj:assertj-core:3.10.0')
         testCompile('org.junit.jupiter:junit-jupiter-api:5.2.0')
         testRuntime('org.junit.jupiter:junit-jupiter-engine:5.2.0')
         testRuntimeOnly('org.apache.logging.log4j:log4j-jul:2.11.0')
@@ -73,18 +74,18 @@ configure(subprojects.findAll { !noModule.contains(it.name)  }) {
             }
         }
 
-        compileTestJava {
-            inputs.property("moduleName", moduleName)
-            doFirst {
-                options.compilerArgs = [
-                        '--module-path', classpath.asPath,
-                        '--add-modules', 'org.junit.jupiter.api',
-                        '--add-reads', "$moduleName=org.junit.jupiter.api",
-                        '--patch-module', "$moduleName=" + files(sourceSets.test.java.srcDirs).asPath,
-                ]
-                classpath = files()
-            }
-        }
+//        compileTestJava {
+//            inputs.property("moduleName", moduleName)
+//            doFirst {
+//                options.compilerArgs = [
+//                        '--module-path', classpath.asPath,
+//                        '--add-modules', 'org.junit.jupiter.api',
+//                        '--add-reads', "$moduleName=org.junit.jupiter.api",
+//                        '--patch-module', "$moduleName=" + files(sourceSets.test.java.srcDirs).asPath,
+//                ]
+//                classpath = files()
+//            }
+//        }
 
         test {
             inputs.property("moduleName", moduleName)
@@ -92,7 +93,7 @@ configure(subprojects.findAll { !noModule.contains(it.name)  }) {
                 jvmArgs = [
                         '--module-path', classpath.asPath,
                         '--add-modules', 'ALL-MODULE-PATH',
-                        '--add-reads', "$moduleName=org.junit.jupiter.api",
+                        '--add-reads', "$moduleName=org.junit.jupiter.api,org.assertj.core",
                         '--patch-module', "$moduleName=" + files(sourceSets.test.java.outputDir).asPath,
                 ]
                 def args = jvmArgs
