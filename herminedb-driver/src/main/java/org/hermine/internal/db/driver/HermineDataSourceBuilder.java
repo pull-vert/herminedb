@@ -22,7 +22,7 @@ import jdk.incubator.sql2.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HermineDataSourceBuilderImpl implements DataSource.Builder {
+public class HermineDataSourceBuilder implements DataSource.Builder {
 
     private boolean isBuilt = false;
 
@@ -37,7 +37,7 @@ public class HermineDataSourceBuilderImpl implements DataSource.Builder {
     private Map<ConnectionProperty, Object> requiredConnectionProperties = new HashMap<>();
 
     @Override
-    public HermineDataSourceBuilderImpl defaultConnectionProperty(ConnectionProperty property, Object value) {
+    public HermineDataSourceBuilder defaultConnectionProperty(ConnectionProperty property, Object value) {
         if (isBuilt) {
             throw new IllegalStateException("properties must be added before calling build");
         }
@@ -55,7 +55,7 @@ public class HermineDataSourceBuilderImpl implements DataSource.Builder {
     }
 
     @Override
-    public HermineDataSourceBuilderImpl connectionProperty(ConnectionProperty property, Object value) {
+    public HermineDataSourceBuilder connectionProperty(ConnectionProperty property, Object value) {
         if (isBuilt) {
             throw new IllegalStateException("properties must be added before calling build");
         }
@@ -73,11 +73,11 @@ public class HermineDataSourceBuilderImpl implements DataSource.Builder {
     }
 
     @Override
-    public HermineDataSourceImpl build() {
+    public HermineDataSource build() {
         if (isBuilt) {
             throw new IllegalStateException("cannot build more than once. All objects are use-once");
         }
         isBuilt = true;
-        return new HermineDataSourceImpl(defaultConnectionProperties, requiredConnectionProperties);
+        return new HermineDataSource(defaultConnectionProperties, requiredConnectionProperties);
     }
 }

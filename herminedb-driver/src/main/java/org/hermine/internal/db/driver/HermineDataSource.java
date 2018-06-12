@@ -27,23 +27,23 @@ import java.util.Set;
 /**
  * Bare bones DataSource. No support for Connection caching.
  */
-class HermineDataSourceImpl implements DataSource {
+class HermineDataSource implements DataSource {
 
     private final Map<ConnectionProperty, Object> defaultConnectionProperties;
     private final Map<ConnectionProperty, Object> requiredConnectionProperties;
 
     private final Set<Connection> openConnections = new HashSet<>();
 
-    HermineDataSourceImpl(Map<ConnectionProperty, Object> defaultProps,
-                         Map<ConnectionProperty, Object> requiredProps) {
+    HermineDataSource(Map<ConnectionProperty, Object> defaultProps,
+                      Map<ConnectionProperty, Object> requiredProps) {
         super();
         defaultConnectionProperties = defaultProps;
         requiredConnectionProperties = requiredProps;
     }
 
     @Override
-    public HermineConnectionBuilderImpl builder() {
-        return new HermineConnectionBuilderImpl(this, defaultConnectionProperties, requiredConnectionProperties);
+    public HermineConnectionBuilder builder() {
+        return new HermineConnectionBuilder(this, defaultConnectionProperties, requiredConnectionProperties);
     }
 
     @Override
@@ -51,12 +51,12 @@ class HermineDataSourceImpl implements DataSource {
         openConnections.forEach(Connection::close);
     }
 
-    HermineDataSourceImpl registerConnection(Connection c) {
+    HermineDataSource registerConnection(Connection c) {
         openConnections.add(c);
         return this;
     }
 
-    HermineDataSourceImpl deregisterConnection(Connection c) {
+    HermineDataSource deregisterConnection(Connection c) {
         openConnections.remove(c);
         return this;
     }

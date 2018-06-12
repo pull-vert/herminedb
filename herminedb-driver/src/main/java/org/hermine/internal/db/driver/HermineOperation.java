@@ -77,15 +77,15 @@ abstract class HermineOperation<T> implements Operation<T> {
     private Consumer<Throwable> errorHandler = null;
 
     // internal state
-    private final HermineConnectionImpl connection;
-    private final HermineOperationGroupImpl<T, ?> group;
+    private final HermineConnection connection;
+    private final HermineOperationGroup<T, ?> group;
 
-    HermineOperation(HermineConnectionImpl conn, HermineOperationGroupImpl operationGroup) {
+    HermineOperation(HermineConnection conn, HermineOperationGroup operationGroup) {
         // passing null for connection and operationGroup is a hack. It is not
         // possible to pass _this_ to a super constructor so we define null to mean
         // _this_. Yuck. Only used by Connection.
-        connection = conn == null ? (HermineConnectionImpl) this : conn;
-        group = operationGroup == null ? (HermineOperationGroupImpl) this : operationGroup;
+        connection = conn == null ? (HermineConnection) this : conn;
+        group = operationGroup == null ? (HermineOperationGroup) this : operationGroup;
     }
 
     @Override

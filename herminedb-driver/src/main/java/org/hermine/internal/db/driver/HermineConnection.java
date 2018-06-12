@@ -20,12 +20,12 @@ import jdk.incubator.sql2.*;
 
 import java.util.Map;
 
-class HermineConnectionImpl extends HermineOperationGroupImpl<Object, Object> implements Connection {
+class HermineConnection extends HermineOperationGroup<Object, Object> implements Connection {
 
     private final DataSource dataSource;
     private final Map<ConnectionProperty, Object> properties;
 
-    HermineConnectionImpl(HermineDataSourceImpl ds, Map<ConnectionProperty,Object> properties) {
+    HermineConnection(HermineDataSource ds, Map<ConnectionProperty,Object> properties) {
         super(null, null); // hack as _this_ not allowed. See SimpleOperation constructor
         dataSource = ds;
         this.properties = properties;
@@ -57,12 +57,12 @@ class HermineConnectionImpl extends HermineOperationGroupImpl<Object, Object> im
     }
 
     @Override
-    public HermineConnectionImpl registerLifecycleListener(ConnectionLifecycleListener listener) {
+    public HermineConnection registerLifecycleListener(ConnectionLifecycleListener listener) {
         return this;
     }
 
     @Override
-    public HermineConnectionImpl deregisterLifecycleListener(ConnectionLifecycleListener listener) {
+    public HermineConnection deregisterLifecycleListener(ConnectionLifecycleListener listener) {
         return this;
     }
 
@@ -72,7 +72,7 @@ class HermineConnectionImpl extends HermineOperationGroupImpl<Object, Object> im
     }
 
     @Override
-    public HermineConnectionImpl abort() {
+    public HermineConnection abort() {
         return this;
     }
 
@@ -87,12 +87,12 @@ class HermineConnectionImpl extends HermineOperationGroupImpl<Object, Object> im
     }
 
     @Override
-    public HermineConnectionImpl activate() {
+    public HermineConnection activate() {
         return this;
     }
 
     @Override
-    public HermineConnectionImpl deactivate() {
+    public HermineConnection deactivate() {
         return this;
     }
 }
