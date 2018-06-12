@@ -16,10 +16,16 @@
  */
 package org.hermine.internal.db.driver;
 
+import jdk.incubator.sql2.AdbaType;
 import jdk.incubator.sql2.Operation;
+import jdk.incubator.sql2.SqlType;
 import jdk.incubator.sql2.Submission;
 
-import java.time.Duration;
+import java.math.BigInteger;
+import java.text.MessageFormat;
+import java.time.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -27,6 +33,44 @@ import java.util.function.Consumer;
  * TODO : not based on Completion Stage but on close of previous Flow Publisher
  */
 abstract class HermineOperation<T> implements Operation<T> {
+
+    private static final Map<Class, AdbaType> CLASS_TO_ADBATYPE = new HashMap<>(20);
+    static {
+        try {
+            CLASS_TO_ADBATYPE.put(BigInteger.class, AdbaType.BIGINT);
+            CLASS_TO_ADBATYPE.put(Boolean.class, AdbaType.BOOLEAN);
+            CLASS_TO_ADBATYPE.put(Byte.class, AdbaType.TINYINT);
+            CLASS_TO_ADBATYPE.put(Class.forName("[B"), AdbaType.VARBINARY);
+            CLASS_TO_ADBATYPE.put(Character.class, AdbaType.CHAR);
+            CLASS_TO_ADBATYPE.put(Double.class, AdbaType.DOUBLE);
+            CLASS_TO_ADBATYPE.put(Float.class, AdbaType.FLOAT);
+            CLASS_TO_ADBATYPE.put(Integer.class, AdbaType.INTEGER);
+            CLASS_TO_ADBATYPE.put(LocalDate.class, AdbaType.DATE);
+            CLASS_TO_ADBATYPE.put(LocalDateTime.class, AdbaType.TIMESTAMP);
+            CLASS_TO_ADBATYPE.put(LocalTime.class, AdbaType.TIME);
+            CLASS_TO_ADBATYPE.put(OffsetDateTime.class, AdbaType.TIMESTAMP_WITH_TIMEZONE);
+            CLASS_TO_ADBATYPE.put(OffsetTime.class, AdbaType.TIME_WITH_TIMEZONE);
+            CLASS_TO_ADBATYPE.put(Short.class, AdbaType.SMALLINT);
+            CLASS_TO_ADBATYPE.put(String.class, AdbaType.VARCHAR);
+        }
+        catch (ClassNotFoundException ex) { /* should never happen */ }
+    }
+
+    /**
+     * Find the default SQLType to represent a Java type.
+     *
+     * @param c a Java type
+     * @return the default SQLType to represent the Java type
+     */
+    static SqlType toSQLType(Class c) {
+        var s = CLASS_TO_ADBATYPE.get(c);
+        if (s == null) {
+            throw new UnsupportedOperationException(
+                    MessageFormat.format("{0} is not Not supported yet.", c.getSimpleName()));
+        }
+        return s;
+    }
+
 
     // attributes
     private Duration timeout = null;
