@@ -41,7 +41,9 @@ subprojects {
     }
 }
 
-configure(subprojects.findAll { it.name.startsWith("herminedb-") }) {
+def noModule = ['hermine-jmh', 'hermine-playground']
+
+configure(subprojects.findAll { !noModule.contains(it.name)  }) {
     apply plugin: 'jacoco'
 
     jacoco {

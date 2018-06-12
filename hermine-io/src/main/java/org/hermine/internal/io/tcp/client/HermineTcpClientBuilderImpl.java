@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HermineDB's author : Frédéric Montariol,
+ * Copyright 2018 HermineTcpClient's author : Frédéric Montariol,
  * and explicitly declared author of this file if provided.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,27 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.internal.hermine.db;
+package org.hermine.internal.io.tcp.client;
 
-import org.hermine.db.HermineDB;
+import org.hermine.io.tcp.client.HermineTcpClient;
 
-/**
- * An HermineDBFacade is a simple class that wraps an HermineDB implementation
- * and delegates everything to its implementation delegate.
- */
-final class HermineDBFacade extends HermineDB {
+public class HermineTcpClientBuilderImpl implements HermineTcpClient.Builder {
 
-    final HermineDBImpl impl;
+    int port = 35700;
 
-    /**
-     * Creates an HermineDBFacade.
-     */
-    HermineDBFacade(HermineDBImpl impl) {
-        this.impl = impl;
+    @Override
+    public HermineTcpClientBuilderImpl port(int port) {
+        if (port < 1) {
+            throw new IllegalArgumentException("int must be greater or equals than 1");
+        }
+        this.port = port;
+        return this;
     }
 
     @Override
-    public String toString() {
-        return impl.toString();
+    public HermineTcpClient build() {
+        return HermineTcpClientImpl.create(this);
     }
 }

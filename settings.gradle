@@ -1,7 +1,9 @@
 rootProject.name = 'herminedb'
 
-include 'hermine-jmh'
-//include 'hermine-playground'
+include 'hermine-io'
 
 include 'herminedb-engine'
 include 'herminedb-driver'
+
+include 'hermine-jmh'
+//include 'hermine-playground'

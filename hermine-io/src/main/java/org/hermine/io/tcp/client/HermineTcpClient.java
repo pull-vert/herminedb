@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HermineDB's author : Frédéric Montariol,
+ * Copyright 2018 HermineTcpClient's author : Frédéric Montariol,
  * and explicitly declared author of this file if provided.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,21 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.hermine.db;
+package org.hermine.io.tcp.client;
 
-import org.internal.hermine.db.HermineDBBuilderImpl;
+import org.hermine.internal.io.tcp.client.HermineTcpClientBuilderImpl;
 
 import javax.net.ssl.SSLContext;
 
-public abstract class HermineDB {
+public abstract class HermineTcpClient {
 
     /**
-     * Creates an HermineDB.
+     * Creates an HermineTcpClient.
      */
-    protected HermineDB() {}
+    protected HermineTcpClient() {}
 
     /**
-     * Returns a new {@code HermineDB} with default settings.
+     * Returns a new {@code HermineTcpClient} with default settings.
      *
      * <p> Equivalent to {@code newBuilder().build()}.
      *
@@ -36,30 +36,30 @@ public abstract class HermineDB {
      * of {@linkplain SSLContext#getDefault() default SSL context}.
      *
      * @implNote The system-wide default values are retrieved at the time the
-     * {@code HermineDB} instance is constructed. Changing the system-wide
-     * values after an {@code HermineDB} instance has been built, for
+     * {@code HermineTcpClient} instance is constructed. Changing the system-wide
+     * values after an {@code HermineTcpClient} instance has been built, for
      * instance, by calling {@link SSLContext#setDefault(SSLContext)}, has no effect on already
      * built instances.
      *
-     * @return a new HermineDB
+     * @return a new HermineTcpClient
      */
-    public static HermineDB newHermineDB() {
+    public static HermineTcpClient newHermineTcpClient() {
         return newBuilder().build();
     }
 
     /**
-     * Creates a new {@code HermineDB} builder.
+     * Creates a new {@code HermineTcpClient} builder.
      *
-     * @return an {@code HermineDB.Builder}
+     * @return an {@code HermineTcpClient.Builder}
      */
     public static Builder newBuilder() {
-        return new HermineDBBuilderImpl();
+        return new HermineTcpClientBuilderImpl();
     }
 
     /**
-     * A builder of {@linkplain HermineDB Hermine DB}.
+     * A builder of {@linkplain HermineTcpClient Hermine DB}.
      *
-     * <p> Builders are created by invoking {@link HermineDB#newBuilder()
+     * <p> Builders are created by invoking {@link HermineTcpClient#newBuilder()
      * newBuilder}. Each of the setter methods modifies the state of the builder
      * and returns the same instance. Builders are not thread-safe and should not be
      * used concurrently from multiple threads without external synchronization.
@@ -67,20 +67,20 @@ public abstract class HermineDB {
     public interface Builder {
 
         /**
-         * Sets the TCP port HermineDB server will listen to
+         * Sets the TCP port this HermineTcpClient will connect to
          *
-         * @param dbPort HermineDB TCP port
+         * @param port HermineTcpClient TCP port
          * @return this builder
          * @throws IllegalArgumentException if the given priority is out of range
          */
-        Builder dbPort(int dbPort);
+        Builder port(int port);
 
         /**
-         * Returns a new {@link HermineDB} built from the current state of this
+         * Returns a new {@link HermineTcpClient} built from the current state of this
          * builder.
          *
-         * @return a new {@code HermineDB}
+         * @return a new {@code HermineTcpClient}
          */
-        HermineDB build();
+        HermineTcpClient build();
     }
 }
