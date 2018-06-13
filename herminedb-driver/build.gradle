@@ -1,8 +1,8 @@
 ext.moduleName='org.herminedb.driver'
 
 repositories {
-    mavenLocal()
-//    maven { setUrl("https://dl.bintray.com/pull-vert/adba/") }
+//    mavenLocal()
+    maven { setUrl("https://dl.bintray.com/pull-vert/adba/") }
 }
 
 dependencies {
