@@ -67,6 +67,11 @@ class HermineOperationGroup<S, T> extends HermineOperation<T> implements Operati
     }
 
     @Override
+    public OperationGroup<S, T> catchErrors() {
+        return null;
+    }
+
+    @Override
     public <R extends S> ArrayCountOperation<R> arrayCountOperation(String sql) {
         return null;
     }
@@ -97,17 +102,17 @@ class HermineOperationGroup<S, T> extends HermineOperation<T> implements Operati
     }
 
     @Override
-    public <R extends S> StaticMultiOperation<R> staticMultiOperation(String sql) {
-        return null;
-    }
-
-    @Override
-    public <R extends S> DynamicMultiOperation<R> dynamicMultiOperation(String sql) {
+    public <R extends S> MultiOperation<R> multiOperation(String s) {
         return null;
     }
 
     @Override
     public Operation<TransactionOutcome> endTransactionOperation(Transaction trans) {
+        return null;
+    }
+
+    @Override
+    public CompletionStage<TransactionOutcome> commitMaybeRollback(Transaction trans) {
         return null;
     }
 

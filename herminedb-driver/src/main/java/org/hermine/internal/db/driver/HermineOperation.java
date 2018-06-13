@@ -48,8 +48,8 @@ abstract class HermineOperation<T> implements Operation<T> {
             CLASS_TO_ADBATYPE.put(LocalDate.class, AdbaType.DATE);
             CLASS_TO_ADBATYPE.put(LocalDateTime.class, AdbaType.TIMESTAMP);
             CLASS_TO_ADBATYPE.put(LocalTime.class, AdbaType.TIME);
-            CLASS_TO_ADBATYPE.put(OffsetDateTime.class, AdbaType.TIMESTAMP_WITH_TIMEZONE);
-            CLASS_TO_ADBATYPE.put(OffsetTime.class, AdbaType.TIME_WITH_TIMEZONE);
+            CLASS_TO_ADBATYPE.put(OffsetDateTime.class, AdbaType.TIMESTAMP_WITH_TIME_ZONE);
+            CLASS_TO_ADBATYPE.put(OffsetTime.class, AdbaType.TIME_WITH_TIME_ZONE);
             CLASS_TO_ADBATYPE.put(Short.class, AdbaType.SMALLINT);
             CLASS_TO_ADBATYPE.put(String.class, AdbaType.VARCHAR);
         }
