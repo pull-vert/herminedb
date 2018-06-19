@@ -77,6 +77,7 @@ class Http1Response<T> {
     final Logger debug = Utils.getDebugLogger(this::dbgString, Utils.DEBUG);
     final static AtomicLong responseCount = new AtomicLong();
     final long id = responseCount.incrementAndGet();
+    private Http1HeaderParser hd;
 
     Http1Response(HttpConnection conn,
                   Http1Exchange<T> exchange,
@@ -88,6 +89,11 @@ class Http1Response<T> {
         this.asyncReceiver = asyncReceiver;
         headersReader = new HeadersReader(this::advance);
         bodyReader = new BodyReader(this::advance);
+
+        hd = new Http1HeaderParser();
+        readProgress = State.READING_HEADERS;
+        headersReader.start(hd);
+        asyncReceiver.subscribe(headersReader);
     }
 
     String dbgTag;
@@ -151,19 +157,36 @@ class Http1Response<T> {
         }
     }
 
+    private volatile boolean firstTimeAround = true;
+
     public CompletableFuture<Response> readHeadersAsync(Executor executor) {
         if (debug.on())
             debug.log("Reading Headers: (remaining: "
                       + asyncReceiver.remaining() +") "  + readProgress);
-        // with expect continue we will resume reading headers + body.
-        asyncReceiver.unsubscribe(bodyReader);
-        bodyReader.reset();
-        Http1HeaderParser hd = new Http1HeaderParser();
-        readProgress = State.READING_HEADERS;
-        headersReader.start(hd);
-        asyncReceiver.subscribe(headersReader);
+
+        if (firstTimeAround) {
+            if (debug.on()) debug.log("First time around");
+            firstTimeAround = false;
+        } else {
+            // with expect continue we will resume reading headers + body.
+            asyncReceiver.unsubscribe(bodyReader);
+            bodyReader.reset();
+
+            hd = new Http1HeaderParser();
+            readProgress = State.READING_HEADERS;
+            headersReader.reset();
+            headersReader.start(hd);
+            asyncReceiver.subscribe(headersReader);
+        }
+
         CompletableFuture<State> cf = headersReader.completion();
         assert cf != null : "parsing not started";
+        if (debug.on()) {
+            debug.log("headersReader is %s",
+                    cf == null ? "not yet started"
+                            : cf.isDone() ? "already completed"
+                            : "not yet completed");
+        }
 
         Function<State, Response> lambda = (State completed) -> {
                 assert completed == State.READING_HEADERS;
@@ -290,13 +313,19 @@ class Http1Response<T> {
                     try {
                         userSubscriber.onComplete();
                     } catch (Throwable x) {
-                        propagateError(t = withError = Utils.getCompletionCause(x));
-                        // rethrow and let the caller deal with it.
+                        // Simply propagate the error by calling
+                        // onError on the user subscriber, and let the
+                        // connection be reused since we should have received
+                        // and parsed all the bytes when we reach here.
+                        // If onError throws in turn, then we will simply
+                        // let that new exception flow up to the caller
+                        // and let it deal with it.
                         // (i.e: log and close the connection)
-                        // arguably we could decide to not throw and let the
-                        // connection be reused since we should have received and
-                        // parsed all the bytes when we reach here.
-                        throw x;
+                        // Note that rethrowing here could introduce a
+                        // race that might cause the next send() operation to
+                        // fail as the connection has already been put back
+                        // into the cache when we reach here.
+                        propagateError(t = withError = Utils.getCompletionCause(x));
                     }
                 } else {
                     propagateError(t);

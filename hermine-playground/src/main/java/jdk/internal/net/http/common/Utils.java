@@ -30,6 +30,7 @@ import sun.net.util.IPAddressUtil;
 import sun.net.www.HeaderParser;
 
 import javax.net.ssl.ExtendedSSLSession;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSession;
 import java.io.ByteArrayOutputStream;
@@ -40,10 +41,12 @@ import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.System.Logger.Level;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLPermission;
 import java.net.http.HttpHeaders;
+import java.net.http.HttpTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -59,9 +62,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -178,6 +183,17 @@ public final class Utils {
                                 .map(String::trim)
                                 .filter((s) -> !s.isEmpty())
                                 .collect(Collectors.toUnmodifiableSet());
+    }
+
+    public static <T> CompletableFuture<T> wrapForDebug(Logger logger, String name, CompletableFuture<T> cf) {
+        if (logger.on()) {
+            return cf.handle((r,t) -> {
+                logger.log("%s completed %s", name, t == null ? "successfully" : t );
+                return cf;
+            }).thenCompose(Function.identity());
+        } else {
+            return cf;
+        }
     }
 
     private static final String WSPACES = " \t\r\n";
@@ -936,6 +952,20 @@ public final class Utils {
             address = new InetSocketAddress(address.getHostString(), address.getPort());
         }
         return address;
+    }
+
+    public static Throwable toConnectException(Throwable e) {
+        if (e == null) return null;
+        e = getCompletionCause(e);
+        if (e instanceof ConnectException) return e;
+        if (e instanceof SecurityException) return e;
+        if (e instanceof SSLException) return e;
+        if (e instanceof Error) return e;
+        if (e instanceof HttpTimeoutException) return e;
+        Throwable cause = e;
+        e = new ConnectException(e.getMessage());
+        e.initCause(cause);
+        return e;
     }
 
     /**

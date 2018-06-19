@@ -89,7 +89,7 @@ public abstract class HttpRequest {
      * <p> Instances of {@code HttpRequest.Builder} are created by calling {@link
      * HttpRequest#newBuilder(URI)} or {@link HttpRequest#newBuilder()}.
      *
-     * <p> The builder can be used to configure per-request state, like: the
+     * <p> The builder can be used to configure per-request state, such as: the
      * request URI, the request method ( default is GET unless explicitly set ),
      * specific request headers, etc. Each of the setter methods modifies the
      * state of the builder and returns the same instance. The methods are not
@@ -187,9 +187,9 @@ public abstract class HttpRequest {
          * Sets a timeout for this request. If the response is not received
          * within the specified timeout then an {@link HttpTimeoutException} is
          * thrown from {@link HttpClient#send(HttpRequest,
-         * java.net.http.HttpResponse.BodyHandler) HttpClient::send} or
+         * HttpResponse.BodyHandler) HttpClient::send} or
          * {@link HttpClient#sendAsync(HttpRequest,
-         * java.net.http.HttpResponse.BodyHandler) HttpClient::sendAsync}
+         * HttpResponse.BodyHandler) HttpClient::sendAsync}
          * completes exceptionally with an {@code HttpTimeoutException}. The effect
          * of not setting a timeout is the same as setting an infinite Duration, ie.
          * block forever.

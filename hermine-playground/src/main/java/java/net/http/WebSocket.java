@@ -37,7 +37,7 @@ import java.util.concurrent.CompletionStage;
  *
  * <p> {@code WebSocket} instances are created through {@link Builder}.
  *
- * <p> WebSocket has an input and an output sides. These sides are independent
+ * <p> WebSocket has an input and an output side. These sides are independent
  * from each other. A side can either be open or closed. Once closed, the side
  * remains closed. WebSocket messages are sent through a {@code WebSocket} and
  * received through a {@code WebSocket.Listener} associated with it. Messages
@@ -238,11 +238,11 @@ public interface WebSocket {
      * exceptionally, the WebSocket will invoke {@code onError} with this
      * exception.
      *
-     * @apiNote <p> The strict sequential order of invocations from
-     * {@code WebSocket} to {@code Listener} means, in particular, that
-     * {@code Listener}'s methods are treated as non-reentrant. Which means that
+     * @apiNote The strict sequential order of invocations from
+     * {@code WebSocket} to {@code Listener} means, in particular, that the
+     * {@code Listener}'s methods are treated as non-reentrant. This means that
      * {@code Listener} implementations do not need to be concerned with
-     * possible recursion or the order in which they call
+     * possible recursion or the order in which they invoke
      * {@code WebSocket.request} in relation to their processing logic.
      *
      * <p> Careful attention may be required if a listener is associated
