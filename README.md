@@ -1,11 +1,10 @@
-#herminedb
+# herminedb
 Hermine DB is a Asynchronous SQL Database written in Java, and the associated ADBA driver (Asynchronous Database Access)
 
-##Building Hermine
+## Building Hermine
+Clone Hermine from [GitHub](https://github.com/pull-vert/herminedb).
 
 Hermine require JDK 10 or later. It is modularized with Jigsaw.
-
-Clone Hermine from [GitHub](https://github.com/pull-vert/herminedb).
 
 ## Modules
 Main modules
@@ -18,6 +17,6 @@ Other modules
 * hermine-jmh contains microbenchmarks to test performances of Hermine components
 * [hermine-playground](hermine-playground/README.md) is a free place to test various stuff, can contain influences and ideas
 
-##Inspirations and code origin :
+## Inspirations and code origin
 hermine-io's TCP is inspired by java.net.http from openjdk, that is a sandbox revision targeted for JDK11 of reactive (Flow) async http and http2 client created in JDK 9.
 hermine-driver is inspired by [Oracle AoJ : ADBA over JDBC](https://github.com/oracle/oracle-db-examples/tree/master/java/AoJ)
