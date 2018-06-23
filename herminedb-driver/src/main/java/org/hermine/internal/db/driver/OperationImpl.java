@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 /**
  * TODO : not based on Completion Stage but on close of previous Flow Publisher
  */
-abstract class HermineOperation<T> implements Operation<T> {
+abstract class OperationImpl<T> implements Operation<T> {
 
     private static final Map<Class, AdbaType> CLASS_TO_ADBATYPE = new HashMap<>(20);
     static {
@@ -77,24 +77,24 @@ abstract class HermineOperation<T> implements Operation<T> {
     private Consumer<Throwable> errorHandler = null;
 
     // internal state
-    private final HermineConnection connection;
-    private final HermineOperationGroup<T, ?> group;
+    private final ConnectionImpl connection;
+    private final OperationGroupImpl<T, ?> group;
 
-    HermineOperation(HermineConnection conn, HermineOperationGroup operationGroup) {
+    OperationImpl(ConnectionImpl conn, OperationGroupImpl operationGroup) {
         // passing null for connection and operationGroup is a hack. It is not
         // possible to pass _this_ to a super constructor so we define null to mean
         // _this_. Yuck. Only used by Connection.
-        connection = conn == null ? (HermineConnection) this : conn;
-        group = operationGroup == null ? (HermineOperationGroup) this : operationGroup;
+        connection = conn == null ? (ConnectionImpl) this : conn;
+        group = operationGroup == null ? (OperationGroupImpl) this : operationGroup;
     }
 
     @Override
-    public HermineOperation<T> onError(Consumer<Throwable> handler) {
+    public OperationImpl<T> onError(Consumer<Throwable> handler) {
         return this;
     }
 
     @Override
-    public HermineOperation<T> timeout(Duration minTime) {
+    public OperationImpl<T> timeout(Duration minTime) {
         return this;
     }
 

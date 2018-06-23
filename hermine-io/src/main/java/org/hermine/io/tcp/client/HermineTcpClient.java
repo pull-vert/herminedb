@@ -16,7 +16,7 @@
  */
 package org.hermine.io.tcp.client;
 
-import org.hermine.internal.io.tcp.client.HermineTcpClientBuilderImpl;
+import org.hermine.internal.io.tcp.client.TcpClientBuilderImpl;
 
 import javax.net.ssl.SSLContext;
 
@@ -53,7 +53,7 @@ public abstract class HermineTcpClient {
      * @return an {@code HermineTcpClient.Builder}
      */
     public static Builder newBuilder() {
-        return new HermineTcpClientBuilderImpl();
+        return new TcpClientBuilderImpl();
     }
 
     /**

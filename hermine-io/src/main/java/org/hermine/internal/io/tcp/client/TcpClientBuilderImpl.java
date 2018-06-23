@@ -18,12 +18,12 @@ package org.hermine.internal.io.tcp.client;
 
 import org.hermine.io.tcp.client.HermineTcpClient;
 
-public class HermineTcpClientBuilderImpl implements HermineTcpClient.Builder {
+public class TcpClientBuilderImpl implements HermineTcpClient.Builder {
 
     int port = 35700;
 
     @Override
-    public HermineTcpClientBuilderImpl port(int port) {
+    public TcpClientBuilderImpl port(int port) {
         if (port < 1) {
             throw new IllegalArgumentException("int must be greater or equals than 1");
         }
@@ -33,6 +33,6 @@ public class HermineTcpClientBuilderImpl implements HermineTcpClient.Builder {
 
     @Override
     public HermineTcpClient build() {
-        return HermineTcpClientImpl.create(this);
+        return TcpClientImpl.create(this);
     }
 }

@@ -24,24 +24,24 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collector;
 
-class HermineOperationGroup<S, T> extends HermineOperation<T> implements OperationGroup<S, T> {
+class OperationGroupImpl<S, T> extends OperationImpl<T> implements OperationGroup<S, T> {
 
-    HermineOperationGroup(HermineConnection conn, HermineOperationGroup<? super T, ?> group) {
+    OperationGroupImpl(ConnectionImpl conn, OperationGroupImpl<? super T, ?> group) {
         super(conn, group);
     }
 
     @Override
-    public HermineOperationGroup<S, T> parallel() {
+    public OperationGroupImpl<S, T> parallel() {
         return this;
     }
 
     @Override
-    public HermineOperationGroup<S, T> independent() {
+    public OperationGroupImpl<S, T> independent() {
         return this;
     }
 
     @Override
-    public HermineOperationGroup<S, T> conditional(CompletionStage<Boolean> condition) {
+    public OperationGroupImpl<S, T> conditional(CompletionStage<Boolean> condition) {
         return this;
     }
 
@@ -56,7 +56,7 @@ class HermineOperationGroup<S, T> extends HermineOperation<T> implements Operati
     }
 
     @Override
-    public HermineOperationGroup<S, T> collect(Collector<S, ?, T> c) {
+    public OperationGroupImpl<S, T> collect(Collector<S, ?, T> c) {
         return this;
     }
 
@@ -128,12 +128,12 @@ class HermineOperationGroup<S, T> extends HermineOperation<T> implements Operati
     // Override all Operation methods
 
     @Override
-    public HermineOperationGroup<S, T> onError(Consumer<Throwable> handler) {
+    public OperationGroupImpl<S, T> onError(Consumer<Throwable> handler) {
         return this;
     }
 
     @Override
-    public HermineOperationGroup<S, T> timeout(Duration minTime) {
+    public OperationGroupImpl<S, T> timeout(Duration minTime) {
         return this;
     }
 

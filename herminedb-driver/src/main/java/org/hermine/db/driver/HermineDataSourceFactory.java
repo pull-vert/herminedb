@@ -18,12 +18,12 @@ package org.hermine.db.driver;
 
 import jdk.incubator.sql2.DataSource;
 import jdk.incubator.sql2.DataSourceFactory;
-import org.hermine.internal.db.driver.HermineDataSourceBuilder;
+import org.hermine.internal.db.driver.DataSourceBuilderImpl;
 
 final public class HermineDataSourceFactory implements DataSourceFactory {
 
     @Override
     public DataSource.Builder builder() {
-        return new HermineDataSourceBuilder();
+        return new DataSourceBuilderImpl();
     }
 }

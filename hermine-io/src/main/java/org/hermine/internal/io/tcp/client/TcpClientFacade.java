@@ -19,17 +19,17 @@ package org.hermine.internal.io.tcp.client;
 import org.hermine.io.tcp.client.HermineTcpClient;
 
 /**
- * An HermineDBFacade is a simple class that wraps an HermineTcpClient implementation
+ * An {@link TcpClientFacade} is a simple class that wraps an {@link TcpClientImpl} implementation
  * and delegates everything to its implementation delegate.
  */
-final class HermineTcpClientFacade extends HermineTcpClient {
+final class TcpClientFacade extends HermineTcpClient {
 
-    final HermineTcpClientImpl delegate;
+    final TcpClientImpl delegate;
 
     /**
-     * Creates an HermineTcpClientFacade.
+     * Creates an TcpClientFacade.
      */
-    HermineTcpClientFacade(HermineTcpClientImpl delegate) {
+    TcpClientFacade(TcpClientImpl delegate) {
         this.delegate = delegate;
     }
 

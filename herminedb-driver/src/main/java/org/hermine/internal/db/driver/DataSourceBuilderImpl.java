@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class HermineDataSourceBuilder implements DataSource.Builder {
+public class DataSourceBuilderImpl implements DataSource.Builder {
 
     private boolean isBuilt = false;
 
@@ -38,7 +38,7 @@ public class HermineDataSourceBuilder implements DataSource.Builder {
     private Map<ConnectionProperty, Object> requiredConnectionProperties = new HashMap<>();
 
     @Override
-    public HermineDataSourceBuilder defaultConnectionProperty(ConnectionProperty property, Object value) {
+    public DataSourceBuilderImpl defaultConnectionProperty(ConnectionProperty property, Object value) {
         if (isBuilt) {
             throw new IllegalStateException("properties must be added before calling build");
         }
@@ -56,7 +56,7 @@ public class HermineDataSourceBuilder implements DataSource.Builder {
     }
 
     @Override
-    public HermineDataSourceBuilder connectionProperty(ConnectionProperty property, Object value) {
+    public DataSourceBuilderImpl connectionProperty(ConnectionProperty property, Object value) {
         if (isBuilt) {
             throw new IllegalStateException("properties must be added before calling build");
         }
@@ -74,16 +74,16 @@ public class HermineDataSourceBuilder implements DataSource.Builder {
     }
 
     @Override
-    public HermineDataSourceBuilder requestHook(Consumer<Long> request) {
+    public DataSourceBuilderImpl requestHook(Consumer<Long> request) {
         return null;
     }
 
     @Override
-    public HermineDataSource build() {
+    public DataSourceImpl build() {
         if (isBuilt) {
             throw new IllegalStateException("cannot build more than once. All objects are use-once");
         }
         isBuilt = true;
-        return new HermineDataSource(defaultConnectionProperties, requiredConnectionProperties);
+        return new DataSourceImpl(defaultConnectionProperties, requiredConnectionProperties);
     }
 }

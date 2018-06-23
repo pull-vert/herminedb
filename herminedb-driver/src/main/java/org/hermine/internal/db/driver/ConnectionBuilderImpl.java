@@ -22,16 +22,16 @@ import jdk.incubator.sql2.ConnectionProperty;
 import java.util.HashMap;
 import java.util.Map;
 
-class HermineConnectionBuilder implements Connection.Builder {
+class ConnectionBuilderImpl implements Connection.Builder {
 
     private boolean isBuilt = false;
-    private final HermineDataSource dataSource;
+    private final DataSourceImpl dataSource;
     private final Map<ConnectionProperty, Object> defaultProperties;
     private final Map<ConnectionProperty, Object> requiredProperties;
 
-    HermineConnectionBuilder(HermineDataSource ds,
-                             Map<ConnectionProperty, Object> defaultConnectionProperties,
-                             Map<ConnectionProperty, Object> specifiedConnectionProperties) {
+    ConnectionBuilderImpl(DataSourceImpl ds,
+                          Map<ConnectionProperty, Object> defaultConnectionProperties,
+                          Map<ConnectionProperty, Object> specifiedConnectionProperties) {
         super();
         dataSource = ds;
         defaultProperties = new HashMap<>(defaultConnectionProperties);
@@ -39,7 +39,7 @@ class HermineConnectionBuilder implements Connection.Builder {
     }
 
     @Override
-    public HermineConnectionBuilder property(ConnectionProperty property, Object value) {
+    public ConnectionBuilderImpl property(ConnectionProperty property, Object value) {
         if (isBuilt) {
             throw new IllegalStateException("TODO");
         }
@@ -62,6 +62,6 @@ class HermineConnectionBuilder implements Connection.Builder {
         // replace default values with specified values where provided
         // otherwise use defaults
         defaultProperties.putAll(requiredProperties);
-        return new HermineConnection(dataSource, defaultProperties);
+        return new ConnectionImpl(dataSource, defaultProperties);
     }
 }

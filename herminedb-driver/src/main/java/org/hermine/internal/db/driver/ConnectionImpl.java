@@ -21,12 +21,12 @@ import jdk.incubator.sql2.*;
 import java.util.Map;
 import java.util.function.Consumer;
 
-class HermineConnection extends HermineOperationGroup<Object, Object> implements Connection {
+class ConnectionImpl extends OperationGroupImpl<Object, Object> implements Connection {
 
     private final DataSource dataSource;
     private final Map<ConnectionProperty, Object> properties;
 
-    HermineConnection(HermineDataSource ds, Map<ConnectionProperty,Object> properties) {
+    ConnectionImpl(DataSourceImpl ds, Map<ConnectionProperty,Object> properties) {
         super(null, null); // hack as _this_ not allowed. See SimpleOperation constructor
         dataSource = ds;
         this.properties = properties;
@@ -58,12 +58,12 @@ class HermineConnection extends HermineOperationGroup<Object, Object> implements
     }
 
     @Override
-    public HermineConnection registerLifecycleListener(ConnectionLifecycleListener listener) {
+    public ConnectionImpl registerLifecycleListener(ConnectionLifecycleListener listener) {
         return this;
     }
 
     @Override
-    public HermineConnection deregisterLifecycleListener(ConnectionLifecycleListener listener) {
+    public ConnectionImpl deregisterLifecycleListener(ConnectionLifecycleListener listener) {
         return this;
     }
 
@@ -73,7 +73,7 @@ class HermineConnection extends HermineOperationGroup<Object, Object> implements
     }
 
     @Override
-    public HermineConnection abort() {
+    public ConnectionImpl abort() {
         return this;
     }
 
@@ -88,17 +88,17 @@ class HermineConnection extends HermineOperationGroup<Object, Object> implements
     }
 
     @Override
-    public HermineConnection requestHook(Consumer<Long> request) {
+    public ConnectionImpl requestHook(Consumer<Long> request) {
         return null;
     }
 
     @Override
-    public HermineConnection activate() {
+    public ConnectionImpl activate() {
         return this;
     }
 
     @Override
-    public HermineConnection deactivate() {
+    public ConnectionImpl deactivate() {
         return this;
     }
 }
