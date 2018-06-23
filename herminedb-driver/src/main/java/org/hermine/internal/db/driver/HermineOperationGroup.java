@@ -20,7 +20,6 @@ import jdk.incubator.sql2.*;
 
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Flow;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collector;
@@ -52,7 +51,7 @@ class HermineOperationGroup<S, T> extends HermineOperation<T> implements Operati
     }
 
     @Override
-    public OperationGroup<S, T> releaseProhibitingMoreMembers() {
+    public Submission<T> releaseProhibitingMoreMembers() {
         return null;
     }
 
@@ -72,12 +71,12 @@ class HermineOperationGroup<S, T> extends HermineOperation<T> implements Operati
     }
 
     @Override
-    public <R extends S> ArrayCountOperation<R> arrayCountOperation(String sql) {
+    public <R extends S> ArrayRowCountOperation<R> arrayRowCountOperation(String sql) {
         return null;
     }
 
     @Override
-    public <R extends S> ParameterizedCountOperation<R> countOperation(String sql) {
+    public <R extends S> ParameterizedRowCountOperation<R> rowCountOperation(String sql) {
         return null;
     }
 
@@ -97,7 +96,7 @@ class HermineOperationGroup<S, T> extends HermineOperation<T> implements Operati
     }
 
     @Override
-    public <R extends S> RowProcessorOperation<R> rowProcessorOperation(String sql) {
+    public <R extends S> ParameterizedRowPublisherOperation<R> rowPublisherOperation(String sql) {
         return null;
     }
 
@@ -118,11 +117,6 @@ class HermineOperationGroup<S, T> extends HermineOperation<T> implements Operati
 
     @Override
     public <R extends S> LocalOperation<R> localOperation() {
-        return null;
-    }
-
-    @Override
-    public <R extends S> Flow.Processor<Operation<R>, Submission<R>> operationProcessor() {
         return null;
     }
 

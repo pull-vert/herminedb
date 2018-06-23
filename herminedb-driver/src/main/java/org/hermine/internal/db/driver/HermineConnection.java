@@ -19,6 +19,7 @@ package org.hermine.internal.db.driver;
 import jdk.incubator.sql2.*;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 class HermineConnection extends HermineOperationGroup<Object, Object> implements Connection {
 
@@ -83,6 +84,11 @@ class HermineConnection extends HermineOperationGroup<Object, Object> implements
 
     @Override
     public ShardingKey.Builder shardingKeyBuilder() {
+        return null;
+    }
+
+    @Override
+    public HermineConnection requestHook(Consumer<Long> request) {
         return null;
     }
 

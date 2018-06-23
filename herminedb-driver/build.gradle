@@ -6,5 +6,5 @@ repositories {
 }
 
 dependencies {
-    compile('jdk.incubator:adba:0.03')
+    compile('jdk.incubator:adba:0.04')
 }

@@ -43,7 +43,7 @@ public class HermineDBDriverTest {
     @DisplayName("Verify that DataSourceFactory.forName works. Can't do anything without that.")
     public void forName() {
         // When
-        var name = DataSourceFactory.forName(FACTORY_NAME).getClass().getName();
+        var name = DataSourceFactory.newFactory(FACTORY_NAME).getClass().getName();
 
         // Then
         assertThat(name)

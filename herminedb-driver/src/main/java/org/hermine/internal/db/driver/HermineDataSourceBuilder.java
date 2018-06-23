@@ -21,6 +21,7 @@ import jdk.incubator.sql2.DataSource;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class HermineDataSourceBuilder implements DataSource.Builder {
 
@@ -70,6 +71,11 @@ public class HermineDataSourceBuilder implements DataSource.Builder {
         }
         requiredConnectionProperties.put(property, value);
         return this;
+    }
+
+    @Override
+    public HermineDataSourceBuilder requestHook(Consumer<Long> request) {
+        return null;
     }
 
     @Override

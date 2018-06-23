@@ -10,7 +10,7 @@ Hermine require JDK 10 or later. It is modularized with Jigsaw.
 Main modules
 * herminedb-engine is the database itself
 * [herminedb-driver](herminedb-driver/README.md) is the java asynchronous driver to use to connect to Hermine DB, depends on [ADBA mirror](https://github.com/pull-vert/adba-mirror).
-  *  ADBA is Asynchronous Database Access, a non-blocking database access API that Oracle is proposing as a Java standard
+  * ADBA is Asynchronous Database Access, a non-blocking database access API that Oracle is proposing as a Java standard
 * hermine-io contains the IO used by hermine DB engine and driver
 
 Other modules
