@@ -20,11 +20,12 @@ import jdk.incubator.sql2.*;
 
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Flow;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collector;
 
-class OperationGroupImpl<S, T> extends OperationImpl<T> implements OperationGroup<S, T> {
+class OperationGroupImpl<S, T> extends OperationImpl<T> implements OperationGroup<S, T>, Flow.Publisher<T> {
 
     OperationGroupImpl(ConnectionImpl conn, OperationGroupImpl<? super T, ?> group) {
         super(conn, group);
@@ -140,5 +141,10 @@ class OperationGroupImpl<S, T> extends OperationImpl<T> implements OperationGrou
     @Override
     public Submission<T> submit() {
         return null;
+    }
+
+    @Override
+    public void subscribe(Flow.Subscriber<? super T> subscriber) {
+
     }
 }

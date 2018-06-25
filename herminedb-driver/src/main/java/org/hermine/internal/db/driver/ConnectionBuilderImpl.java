@@ -41,13 +41,13 @@ class ConnectionBuilderImpl implements Connection.Builder {
     @Override
     public ConnectionBuilderImpl property(ConnectionProperty property, Object value) {
         if (isBuilt) {
-            throw new IllegalStateException("TODO");
+            throw new IllegalStateException("The Connection was already buit");
         }
         if (requiredProperties.containsKey(property)) {
             throw new IllegalArgumentException("cannot override required properties");
         }
         if (!property.validate(value)) {
-            throw new IllegalArgumentException("TODO");
+            throw new IllegalArgumentException("Property is not valid");
         }
         requiredProperties.put(property, value);
         return this;
@@ -56,7 +56,7 @@ class ConnectionBuilderImpl implements Connection.Builder {
     @Override
     public Connection build() {
         if (isBuilt) {
-            throw new IllegalStateException("TODO");
+            throw new IllegalStateException("The Connection was already buit");
         }
         isBuilt = true;
         // replace default values with specified values where provided

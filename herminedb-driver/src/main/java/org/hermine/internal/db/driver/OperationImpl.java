@@ -16,22 +16,18 @@
  */
 package org.hermine.internal.db.driver;
 
-import jdk.incubator.sql2.AdbaType;
-import jdk.incubator.sql2.Operation;
-import jdk.incubator.sql2.SqlType;
-import jdk.incubator.sql2.Submission;
+import jdk.incubator.sql2.*;
 
 import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Flow;
 import java.util.function.Consumer;
 
-/**
- * TODO : not based on Completion Stage but on close of previous Flow Publisher
- */
 abstract class OperationImpl<T> implements Operation<T> {
 
     private static final Map<Class, AdbaType> CLASS_TO_ADBATYPE = new HashMap<>(20);
@@ -71,7 +67,6 @@ abstract class OperationImpl<T> implements Operation<T> {
         return s;
     }
 
-
     // attributes
     private Duration timeout = null;
     private Consumer<Throwable> errorHandler = null;
@@ -79,6 +74,7 @@ abstract class OperationImpl<T> implements Operation<T> {
     // internal state
     private final ConnectionImpl connection;
     private final OperationGroupImpl<T, ?> group;
+    protected OperationLifecycle operationLifecycle = OperationLifecycle.MUTABLE;
 
     OperationImpl(ConnectionImpl conn, OperationGroupImpl operationGroup) {
         // passing null for connection and operationGroup is a hack. It is not
@@ -90,20 +86,115 @@ abstract class OperationImpl<T> implements Operation<T> {
 
     @Override
     public OperationImpl<T> onError(Consumer<Throwable> handler) {
+        if (isImmutable() || errorHandler != null) {
+            throw new IllegalStateException("TODO");
+        }
+        if (handler == null) {
+            throw new IllegalArgumentException("TODO");
+        }
+        errorHandler = handler;
         return this;
     }
 
     @Override
     public OperationImpl<T> timeout(Duration minTime) {
+        if (isImmutable() || timeout != null) {
+            throw new IllegalStateException("TODO");
+        }
+        if (minTime == null || minTime.isNegative() || minTime.isZero()) {
+            throw new IllegalArgumentException("minTime must be > 0");
+        }
+        timeout = minTime;
         return this;
     }
 
     @Override
     public Submission<T> submit() {
-        return null;
+        if (isImmutable()) {
+            throw new IllegalStateException("TODO");
+        }
+        immutable();
+        return group.submit(this);
+    }
+
+    /**
+     * Returns true if this Operation is immutable. An Operation is immutable if
+     * it has been submitted. Held OperationGroups are an exception.
+     *
+     * @return return true if immutable
+     */
+    boolean isImmutable() {
+        return operationLifecycle.isImmutable();
+    }
+
+    protected OperationImpl<T> immutable() {
+        operationLifecycle = OperationLifecycle.RELEASED;
+        return this;
+    }
+
+    long getTimeoutMillis() {
+        if (timeout == null) {
+            return 0L;
+        }
+        else {
+            return timeout.get(ChronoUnit.MILLIS);
+        }
     }
 
     Executor getExecutor() {
         return connection.getExecutor();
+    }
+
+    boolean cancel() {
+        if (operationLifecycle.isFinished()) {
+            return false;
+        }
+        else {
+            operationLifecycle = OperationLifecycle.CANCELED;
+            return true;
+        }
+    }
+
+    boolean isCanceled() {
+        return operationLifecycle.isCanceled();
+    }
+
+    OperationImpl<T> checkCanceled() {
+        if (isCanceled()) {
+            throw new SqlSkippedException("TODO", null, null, -1, null, -1);
+        }
+        return this;
+    }
+
+    // todo attachErrorHandler to a custom Flow to be excecuted when custom Flow.Subscriber.onError
+
+    static enum OperationLifecycle {
+        MUTABLE,
+        HELD,
+        RELEASED,
+        COMPLETED,
+        CANCELED;
+
+        /**
+         * @return true if op has been submitted which means no more configuration
+         */
+        boolean isSubmitted() {
+            return this != MUTABLE;
+        }
+
+        /**
+         * @return return true if no new members may be added. Implies isSubmitted
+         */
+        boolean isImmutable() { //TODO better name?
+            return this == RELEASED || this == COMPLETED || this == CANCELED;
+        }
+
+        boolean isFinished() {
+            return this == COMPLETED || this == CANCELED;
+        }
+
+        boolean isCanceled() {
+            return this == CANCELED;
+        }
     }
 }
