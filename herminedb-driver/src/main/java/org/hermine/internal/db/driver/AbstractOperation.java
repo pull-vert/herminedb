@@ -25,10 +25,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Flow;
 import java.util.function.Consumer;
 
-abstract class OperationImpl<T> implements Operation<T> {
+abstract class AbstractOperation<T> implements Operation<T> {
 
     private static final Map<Class, AdbaType> CLASS_TO_ADBATYPE = new HashMap<>(20);
     static {
@@ -76,7 +75,7 @@ abstract class OperationImpl<T> implements Operation<T> {
     private final OperationGroupImpl<T, ?> group;
     protected OperationLifecycle operationLifecycle = OperationLifecycle.MUTABLE;
 
-    OperationImpl(ConnectionImpl conn, OperationGroupImpl operationGroup) {
+    AbstractOperation(ConnectionImpl conn, OperationGroupImpl operationGroup) {
         // passing null for connection and operationGroup is a hack. It is not
         // possible to pass _this_ to a super constructor so we define null to mean
         // _this_. Yuck. Only used by Connection.
@@ -85,7 +84,7 @@ abstract class OperationImpl<T> implements Operation<T> {
     }
 
     @Override
-    public OperationImpl<T> onError(Consumer<Throwable> handler) {
+    public AbstractOperation<T> onError(Consumer<Throwable> handler) {
         if (isImmutable() || errorHandler != null) {
             throw new IllegalStateException("TODO");
         }
@@ -97,7 +96,7 @@ abstract class OperationImpl<T> implements Operation<T> {
     }
 
     @Override
-    public OperationImpl<T> timeout(Duration minTime) {
+    public AbstractOperation<T> timeout(Duration minTime) {
         if (isImmutable() || timeout != null) {
             throw new IllegalStateException("TODO");
         }
@@ -114,7 +113,8 @@ abstract class OperationImpl<T> implements Operation<T> {
             throw new IllegalStateException("TODO");
         }
         immutable();
-        return group.submit(this);
+//        return group.submit(this);
+        return null;
     }
 
     /**
@@ -127,7 +127,7 @@ abstract class OperationImpl<T> implements Operation<T> {
         return operationLifecycle.isImmutable();
     }
 
-    protected OperationImpl<T> immutable() {
+    protected AbstractOperation<T> immutable() {
         operationLifecycle = OperationLifecycle.RELEASED;
         return this;
     }
@@ -159,7 +159,7 @@ abstract class OperationImpl<T> implements Operation<T> {
         return operationLifecycle.isCanceled();
     }
 
-    OperationImpl<T> checkCanceled() {
+    AbstractOperation<T> checkCanceled() {
         if (isCanceled()) {
             throw new SqlSkippedException("TODO", null, null, -1, null, -1);
         }

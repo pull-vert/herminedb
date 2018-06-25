@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collector;
 
-class OperationGroupImpl<S, T> extends OperationImpl<T> implements OperationGroup<S, T>, Flow.Publisher<T> {
+class OperationGroupImpl<S, T> extends AbstractOperation<T> implements OperationGroup<S, T>, Flow.Publisher<AbstractOperation<? super S>> {
 
     OperationGroupImpl(ConnectionImpl conn, OperationGroupImpl<? super T, ?> group) {
         super(conn, group);
@@ -139,12 +139,14 @@ class OperationGroupImpl<S, T> extends OperationImpl<T> implements OperationGrou
     }
 
     @Override
-    public Submission<T> submit() {
+    public SubmissionSubscriber<T> submit() {
         return null;
     }
 
+    // Override all Flow.Publisher methods
+
     @Override
-    public void subscribe(Flow.Subscriber<? super T> subscriber) {
+    public void subscribe(Flow.Subscriber<? super AbstractOperation<? super S>> subscriber) {
 
     }
 }
