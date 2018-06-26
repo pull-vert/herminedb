@@ -17,18 +17,55 @@
 package org.hermine.internal.db.driver;
 
 import jdk.incubator.sql2.*;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Flow;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collector;
 
-class OperationGroupImpl<S, T> extends AbstractOperation<T> implements OperationGroup<S, T>, Flow.Publisher<AbstractOperation<? super S>> {
+class OperationGroupImpl<S, T> extends AbstractOperation<T> implements OperationGroup<S, T> {
 
-    OperationGroupImpl(ConnectionImpl conn, OperationGroupImpl<? super T, ?> group) {
+    static final Collector DEFAULT_COLLECTOR = Collector.of(
+            () -> null,
+            (a, v) -> {},
+            (a, b) -> null,
+            a -> null);
+
+    static final Mono<Boolean> DEFAULT_CONDITION = Mono.just(true);
+
+    private Mono<Boolean> condition = DEFAULT_CONDITION;
+
+    private Object accumulator;
+    private Collector collector;
+
+    /**
+     * completed when this OperationGroup is no longer held. Completion of this
+     * OperationGroup depends on held.
+     *
+     * @see submit, releaseProhibitingMoreOperations, submitHoldingForMoreOperations
+     */
+    private final Mono<S> held;
+
+    /**
+     * predecessor of all member Operations and the OperationGroup itself
+     */
+    private final Mono head;
+
+    /**
+     * The last Mono of any submitted member Operation. Mutable until
+     * not isHeld().
+     */
+    private Mono<S> memberTail;
+
+    protected OperationGroupImpl(ConnectionImpl conn, OperationGroupImpl<? super T, ?> group) {
         super(conn, group);
+        held = Mono.empty();
+        head = Mono.empty();
+        memberTail = head;
+        collector = DEFAULT_COLLECTOR;
     }
 
     @Override
@@ -139,14 +176,35 @@ class OperationGroupImpl<S, T> extends AbstractOperation<T> implements Operation
     }
 
     @Override
-    public SubmissionSubscriber<T> submit() {
-        return null;
+    public SubmissionImpl<T> submit() {
+        if ( isImmutable() ) throw new IllegalStateException("TODO");
+        accumulator = collector.supplier().get();
+        SubmissionImpl<T> sub = super.submit();
+        held.subscribe();
+        return sub;
     }
 
-    // Override all Flow.Publisher methods
+    // Internal methods
+
+    SubmissionImpl<S> submit(AbstractOperation<S> op) {
+        memberTail = op.attachErrorHandler(op.follows(memberTail, getScheduler()));
+        return new SubmissionImpl(this::cancel, memberTail);
+    }
 
     @Override
-    public void subscribe(Flow.Subscriber<? super AbstractOperation<? super S>> subscriber) {
-
+    Mono<T> follows(Mono<?> predecessor, Scheduler scheduler) {
+        return condition.flatMap(cond -> {
+                    if (cond) {
+                        head.thenReturn(predecessor);
+                        return held.then(memberTail.map(t -> (T)collector.finisher()
+                                        .apply(accumulator))
+                                .publishOn(scheduler)
+                        );
+                    }
+                    else {
+                        return Mono.empty();
+                    }
+                }
+        );
     }
 }

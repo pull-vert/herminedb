@@ -16,7 +16,12 @@
  */
 package org.hermine.internal.db.driver;
 
-import jdk.incubator.sql2.*;
+import jdk.incubator.sql2.AdbaType;
+import jdk.incubator.sql2.Operation;
+import jdk.incubator.sql2.SqlSkippedException;
+import jdk.incubator.sql2.SqlType;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import java.math.BigInteger;
 import java.text.MessageFormat;
@@ -24,7 +29,6 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 abstract class AbstractOperation<T> implements Operation<T> {
@@ -108,13 +112,12 @@ abstract class AbstractOperation<T> implements Operation<T> {
     }
 
     @Override
-    public Submission<T> submit() {
+    public SubmissionImpl<T> submit() {
         if (isImmutable()) {
             throw new IllegalStateException("TODO");
         }
         immutable();
-//        return group.submit(this);
-        return null;
+        return group.submit(this);
     }
 
     /**
@@ -141,9 +144,27 @@ abstract class AbstractOperation<T> implements Operation<T> {
         }
     }
 
-    Executor getExecutor() {
-        return connection.getExecutor();
+    Scheduler getScheduler() {
+        return connection.getScheduler();
     }
+
+    /**
+     * Attaches the Mono that starts this Operation to the tail and
+     * return a Mono that represents completion of this Operation.
+     * The returned Mono may not be directly attached to the tail,
+     * but completion of the tail should result in completion of the returned
+     * Mono. (Note: Not quite true for OperationGroups submitted by
+     * calling submitHoldingForMoreMembers. While the returned Mono
+     * does depend on the tail, it also depends on user code calling
+     * releaseProhibitingMoreMembers.)
+     *
+     * @param tail the predecessor of this operation. Completion of tail starts
+     * execution of this Operation
+     * @param scheduler used for asynchronous execution
+     * @return completion of this Mono means this Operation is
+     * complete. The value of the Operation is the value of the Mono.
+     */
+    abstract Mono<T> follows(Mono<?> tail, Scheduler scheduler);
 
     boolean cancel() {
         if (operationLifecycle.isFinished()) {
@@ -164,6 +185,30 @@ abstract class AbstractOperation<T> implements Operation<T> {
             throw new SqlSkippedException("TODO", null, null, -1, null, -1);
         }
         return this;
+    }
+
+
+    /**
+     * If an errorHandler is specified, attach a CompletableFuture to the argument
+     * that will call the errorHandler in event the argument completes
+     * exceptionally and return that CompletableFuture. If there is no errorHandle
+     * specified, return the argument.
+     *
+     * @param result A CompletionStage that may complete exceptionally
+     * @return a CompletableFuture that will call the errorHandle if any.
+     */
+    Mono<T> attachErrorHandler(Mono<T> result) {
+        if (errorHandler != null) {
+            return result.onErrorMap(t -> {
+                Throwable ex = Exceptions.unwrapException(t);
+                errorHandler.accept(ex);
+                if (ex instanceof SqlSkippedException) return ex;
+                else return new SqlSkippedException("TODO", ex, null, -1, null, -1);
+            });
+        }
+        else {
+            return result;
+        }
     }
 
     // todo attachErrorHandler to a custom Flow to be excecuted when custom Flow.Subscriber.onError

@@ -2,9 +2,12 @@ ext.moduleName='org.herminedb.driver'
 
 repositories {
 //    mavenLocal()
-    maven { setUrl("https://dl.bintray.com/pull-vert/adba/") }
+    maven { setUrl("https://dl.bintray.com/pull-vert/adba") }
+    maven { setUrl("http://repo.spring.io/milestone") }
 }
 
 dependencies {
     compile('jdk.incubator:adba:0.05')
+    compile('io.projectreactor:reactor-core:3.2.0.M2')
+    testCompile('io.projectreactor:reactor-test:3.2.0.M2')
 }
