@@ -20,6 +20,8 @@ import jdk.incubator.sql2.AdbaType;
 import jdk.incubator.sql2.Operation;
 import jdk.incubator.sql2.SqlSkippedException;
 import jdk.incubator.sql2.SqlType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
@@ -32,6 +34,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 abstract class AbstractOperation<T> implements Operation<T> {
+
+    private static final Logger LOGGER = LogManager.getLogger(AbstractOperation.class);
 
     private static final Map<Class, AdbaType> CLASS_TO_ADBATYPE = new HashMap<>(20);
     static {
@@ -72,19 +76,19 @@ abstract class AbstractOperation<T> implements Operation<T> {
 
     // attributes
     private Duration timeout = null;
-    private Consumer<Throwable> errorHandler = null;
+    Consumer<Throwable> errorHandler = null;
 
     // internal state
     private final ConnectionImpl connection;
-    private final OperationGroupImpl<T, ?> group;
+    private final AbstractOperationGroup<T, ?> group;
     protected OperationLifecycle operationLifecycle = OperationLifecycle.MUTABLE;
 
-    AbstractOperation(ConnectionImpl conn, OperationGroupImpl operationGroup) {
+    AbstractOperation(ConnectionImpl conn, AbstractOperationGroup operationGroup) {
         // passing null for connection and operationGroup is a hack. It is not
         // possible to pass _this_ to a super constructor so we define null to mean
         // _this_. Yuck. Only used by Connection.
         connection = conn == null ? (ConnectionImpl) this : conn;
-        group = operationGroup == null ? (OperationGroupImpl) this : operationGroup;
+        group = operationGroup == null ? (AbstractOperationGroup) this : operationGroup;
     }
 
     @Override
@@ -113,6 +117,7 @@ abstract class AbstractOperation<T> implements Operation<T> {
 
     @Override
     public SubmissionImpl<T> submit() {
+        LOGGER.info("AbstractOperation#submit");
         if (isImmutable()) {
             throw new IllegalStateException("TODO");
         }
@@ -127,6 +132,7 @@ abstract class AbstractOperation<T> implements Operation<T> {
      * @return return true if immutable
      */
     boolean isImmutable() {
+        LOGGER.info("AbstractOperation#isImmutable");
         return operationLifecycle.isImmutable();
     }
 
@@ -198,6 +204,7 @@ abstract class AbstractOperation<T> implements Operation<T> {
      * @return a CompletableFuture that will call the errorHandle if any.
      */
     Mono<T> attachErrorHandler(Mono<T> result) {
+        LOGGER.info("AbstractOperation#attachErrorHandler");
         if (errorHandler != null) {
             return result.onErrorMap(t -> {
                 Throwable ex = Exceptions.unwrapException(t);
@@ -210,8 +217,6 @@ abstract class AbstractOperation<T> implements Operation<T> {
             return result;
         }
     }
-
-    // todo attachErrorHandler to a custom Flow to be excecuted when custom Flow.Subscriber.onError
 
     static enum OperationLifecycle {
         MUTABLE,

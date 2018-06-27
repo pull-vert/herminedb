@@ -17,6 +17,7 @@
 module org.herminedb.driver {
     requires jdk.incubator.adba;
     requires reactor.core;
+    requires reactor.extra;
     requires org.reactivestreams;
     requires org.apache.logging.log4j;
     exports org.hermine.db.driver;

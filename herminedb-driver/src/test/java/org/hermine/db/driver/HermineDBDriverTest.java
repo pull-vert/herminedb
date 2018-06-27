@@ -16,6 +16,7 @@
  */
 package org.hermine.db.driver;
 
+import jdk.incubator.sql2.Connection;
 import jdk.incubator.sql2.DataSource;
 import jdk.incubator.sql2.DataSourceFactory;
 import org.apache.logging.log4j.LogManager;
@@ -36,7 +37,7 @@ public class HermineDBDriverTest {
 
     private static final String FACTORY_NAME = "org.hermine.db.driver.HermineDataSourceFactory";
 
-    private static final Logger logger = LogManager.getLogger(HermineDBDriverTest.class);
+    private static final Logger LOGGER = LogManager.getLogger(HermineDBDriverTest.class);
 
     @Test
     @Disabled
@@ -50,7 +51,7 @@ public class HermineDBDriverTest {
                 .as("Verify that the DataSourceFactory found is a HermineDataSourceFactory")
                 .isEqualTo("org.hermine.db.driver.HermineDataSourceFactory");
 
-        logger.info("DataSourceFactory.forName class = {}", name);
+        LOGGER.info("DataSourceFactory.forName class = {}", name);
     }
 
     @Test
@@ -70,5 +71,26 @@ public class HermineDBDriverTest {
         assertThat(ds)
                 .as("Verify that DataSource is created.")
                 .isNotNull();
+    }
+
+    @Test
+    @DisplayName("Verify that can create a Connection. Should work even if there is no database.")
+    public void createConnection() {
+        // Given
+        DataSourceFactory factory = new HermineDataSourceFactory();
+
+        // When
+        DataSource ds = factory.builder()
+                .url(URL)
+                .username(USER)
+                .password(PASSWORD)
+                .build();
+        try (Connection conn = ds.getConnection(t -> System.out.println("ERROR: " + t.getMessage()))) {
+            // Then
+            assertThat(conn)
+                    .as("Verify that Connection is created.")
+                    .isNotNull();
+            LOGGER.info("connection class = {}", conn.getClass());
+        }
     }
 }

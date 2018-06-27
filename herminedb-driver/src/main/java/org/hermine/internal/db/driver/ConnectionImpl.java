@@ -17,24 +17,33 @@
 package org.hermine.internal.db.driver;
 
 import jdk.incubator.sql2.*;
+import reactor.core.scheduler.Scheduler;
 
 import java.util.Map;
 import java.util.function.Consumer;
 
-class ConnectionImpl extends OperationGroupImpl<Object, Object> implements Connection {
+class ConnectionImpl extends SequentialOperationGroup<Object, Object> implements Connection {
 
+    // FIELDS
     private final DataSource dataSource;
     private final Map<ConnectionProperty, Object> properties;
 
-    ConnectionImpl(DataSourceImpl ds, Map<ConnectionProperty,Object> properties) {
+    private final Scheduler scheduler;
+
+    ConnectionImpl(DataSourceImpl ds, Map<ConnectionProperty, Object> properties) {
         super(null, null); // hack as _this_ not allowed. See SimpleOperation constructor
         dataSource = ds;
         this.properties = properties;
+        ConnectionProperty execProp = HermineConnectionProperty.SCHEDULER;
+        scheduler = (Scheduler) properties.getOrDefault(execProp, execProp.defaultValue());
     }
 
     @Override
     public Operation<Void> connectOperation() {
-        return null;
+        if (!isHeld()) {
+            throw new IllegalStateException("TODO");
+        }
+        return SimpleOperation.<Void>newOperation(this, this, this::hermineConnect);
     }
 
     @Override
@@ -44,11 +53,11 @@ class ConnectionImpl extends OperationGroupImpl<Object, Object> implements Conne
 
     @Override
     public Operation<Void> closeOperation() {
-        return null;
+        return UnskippableOperation.<Void>newOperation(this, this, this::hermineClose);
     }
 
     @Override
-    public <S, T> OperationGroup<S, T> operationGroup() {
+    public <S, T> AbstractOperationGroup<S, T> operationGroup() {
         return null;
     }
 
@@ -100,5 +109,20 @@ class ConnectionImpl extends OperationGroupImpl<Object, Object> implements Conne
     @Override
     public ConnectionImpl deactivate() {
         return this;
+    }
+
+    // INTERNAL
+
+    @Override
+    protected Scheduler getScheduler() {
+        return scheduler;
+    }
+
+    private Void hermineConnect(AbstractOperation<Void> op) {
+        return null;
+    }
+
+    private Void hermineClose(AbstractOperation<Void> op) {
+        return null;
     }
 }

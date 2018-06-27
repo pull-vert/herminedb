@@ -1,3 +1,7 @@
+//plugins {
+//    id "io.spring.dependency-management" version "1.0.1.RELEASE"
+//}
+
 ext.moduleName='org.herminedb.driver'
 
 repositories {
@@ -6,8 +10,16 @@ repositories {
     maven { setUrl("http://repo.spring.io/milestone") }
 }
 
+// todo Not released yet
+//dependencyManagement {
+//    imports {
+//        mavenBom "io.projectreactor:reactor-bom:CALIFORNIUM-M1"
+//    }
+//}
+
 dependencies {
     compile('jdk.incubator:adba:0.05')
     compile('io.projectreactor:reactor-core:3.2.0.M2')
+    compile('io.projectreactor.addons:reactor-extra:3.2.0.M1')
     testCompile('io.projectreactor:reactor-test:3.2.0.M2')
 }

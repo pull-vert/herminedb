@@ -18,11 +18,15 @@ package org.hermine.internal.db.driver;
 
 import jdk.incubator.sql2.Connection;
 import jdk.incubator.sql2.ConnectionProperty;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
 class ConnectionBuilderImpl implements Connection.Builder {
+
+    private static final Logger LOGGER = LogManager.getLogger(ConnectionBuilderImpl.class);
 
     private boolean isBuilt = false;
     private final DataSourceImpl dataSource;
@@ -62,6 +66,7 @@ class ConnectionBuilderImpl implements Connection.Builder {
         // replace default values with specified values where provided
         // otherwise use defaults
         defaultProperties.putAll(requiredProperties);
+        LOGGER.info("Creating ConnectionImpl");
         return new ConnectionImpl(dataSource, defaultProperties);
     }
 }
