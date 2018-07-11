@@ -1,29 +1,62 @@
-import java.util.regex.Matcher
-import java.util.regex.Pattern
+/*
+ * Copyright 2018 HermineDB's author : Frédéric Montariol
+ * and explicitly declared author of each file if specified.
+ * Use of this source code is governed by the Apache 2.0 license.
+ */
 
-allprojects {
-    group 'org.hermine'
-    version '0.0.1-SNAPSHOT'
+import org.jetbrains.kotlin.config.KotlinCompilerVersion
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath("org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version")
+        classpath("org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicFU_version")
+    }
 }
 
+// Report Gradle version and Kotlin compiler version when building project
+println("Using Gradle version: ${GradleVersion.current()}")
+println("Using Kotlin compiler version: $KotlinCompilerVersion.VERSION")
+
 subprojects {
-    apply plugin: 'java'
+    apply plugin: 'kotlin'
 
     repositories {
-        mavenCentral()
+        jcenter()
     }
 
     sourceCompatibility = 10
     targetCompatibility = 10
 
-    dependencies {
-        compile('org.apache.logging.log4j:log4j-api:2.11.0')
-        compile('org.apache.logging.log4j:log4j-core:2.11.0')
+    compileKotlin {
+        kotlinOptions.jvmTarget = "1.8"
+        destinationDir = compileJava.destinationDir
+    }
+    compileTestKotlin {
+        kotlinOptions.jvmTarget = "1.8"
+        destinationDir = compileTestJava.destinationDir
+    }
 
-        testCompile('org.assertj:assertj-core:3.10.0')
-        testCompile('org.junit.jupiter:junit-jupiter-api:5.2.0')
-        testRuntime('org.junit.jupiter:junit-jupiter-engine:5.2.0')
-        testRuntimeOnly('org.apache.logging.log4j:log4j-jul:2.11.0')
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    kotlin.experimental.coroutines "enable"
+
+    dependencies {
+        compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
+        compile("org.apache.logging.log4j:log4j-api:$log4j_version")
+        compile("org.apache.logging.log4j:log4j-core:$log4j_version")
+        compile("org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version")
+        compile("io.github.microutils:kotlin-logging:$kotlin_logging_version")
+
+        testCompile("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
+        testCompile("org.assertj:assertj-core:$assertj_version")
+        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junit_version")
+        testRuntimeOnly("org.apache.logging.log4j:log4j-jul:$log4j_version")
     }
 
     test {
@@ -42,9 +75,55 @@ subprojects {
     }
 }
 
+def useAtomicFu = ['hermine-io']
+
+configure(subprojects.findAll { useAtomicFu.contains(it.name) }) {
+    apply plugin: 'kotlinx-atomicfu'
+
+    dependencies {
+        compileOnly "org.jetbrains.kotlinx:atomicfu:$atomicFU_version"
+        testCompile "org.jetbrains.kotlinx:atomicfu:$atomicFU_version"
+    }
+
+    task copyModuleInfo(type: Copy) {
+        from "$buildDir/classes/java/main"
+        include 'module-info.class'
+        into "$buildDir/classes-atomicfu/main"
+    }
+
+    copyModuleInfo.dependsOn compileKotlin
+
+    task deleteModuleInfo(type: Delete) {
+        delete file("$buildDir/classes/java/main/module-info.class")
+    }
+
+    deleteModuleInfo.dependsOn copyModuleInfo
+
+    atomicFU {
+        inputFiles = sourceSets.main.output.classesDirs
+        outputDir = file("$buildDir/classes-atomicfu/main")
+        classPath = sourceSets.main.runtimeClasspath
+        variant = "VH" // "FU" for AtomicXXUpdater, "VH" to use Java 9 VarHandle
+    }
+
+    atomicFU.dependsOn deleteModuleInfo
+    testClasses.dependsOn atomicFU
+    jar.dependsOn atomicFU
+
+    jar {
+        mainSpec.sourcePaths.clear() // hack to clear existing paths
+        from files(atomicFU.outputs, sourceSets.main.output.resourcesDir)
+    }
+
+    test {
+        classpath = files(configurations.testRuntime, atomicFU.outputs, sourceSets.test.output.classesDirs,
+                sourceSets.main.output.resourcesDir)
+    }
+}
+
 def noModule = ['hermine-jmh', 'hermine-playground']
 
-configure(subprojects.findAll { !noModule.contains(it.name)  }) {
+configure(subprojects.findAll { !noModule.contains(it.name) }) {
     apply plugin: 'jacoco'
 
     jacoco {
@@ -87,40 +166,44 @@ configure(subprojects.findAll { !noModule.contains(it.name)  }) {
 //            }
 //        }
 
-        test {
-            inputs.property("moduleName", moduleName)
-            doFirst {
-                jvmArgs = [
-                        '--module-path', classpath.asPath,
-                        '--add-modules', 'ALL-MODULE-PATH',
-                        '--add-reads', "$moduleName=org.junit.jupiter.api,org.assertj.core",
-                        '--patch-module', "$moduleName=" + files(sourceSets.test.java.outputDir).asPath,
-                ]
-                def args = jvmArgs
-                def modulePathIndex = args.indexOf('--module-path') + 1
-                def ps = Pattern.quote(System.properties.'path.separator')
-//                def jd = Pattern.quote(file("$buildDir/classes/java/main") as String)
-                def jt = Pattern.quote(file("$buildDir/classes/java/test") as String)
-//                def rd = Pattern.quote(file("$buildDir/resources/main") as String)
-                def rt = Pattern.quote(file("$buildDir/resources/test") as String)
-                args[modulePathIndex] = args[modulePathIndex]
-//                        .replaceFirst(/(?:$ps|^)$rd/, '')
-                        .replaceFirst(/(?:$ps|^)$rt/, '')
-//                        .replaceFirst(/(?:$ps|^)$jd/, Matcher.quoteReplacement(temporaryDir as String))
-                        .replaceFirst(/(?:$ps|^)$jt/, Matcher.quoteReplacement(temporaryDir as String))
-                jvmArgs = args
-                project.sync {
-                    from compileJava
-                    from processResources
-                    into temporaryDir
-                }
-                classpath = files()
-            }
-        }
+//        test {
+//            inputs.property("moduleName", moduleName)
+//            doFirst {
+//                jvmArgs = [
+//                        '--module-path', classpath.asPath,
+//                        '--add-modules', 'ALL-MODULE-PATH',
+//                        '--add-reads', "$moduleName=org.junit.jupiter.api,org.assertj.core",
+//                        '--patch-module', "$moduleName=" + files(sourceSets.test.java.outputDir).asPath,
+//                ]
+//                def args = jvmArgs
+//                def modulePathIndex = args.indexOf('--module-path') + 1
+//                def ps = Pattern.quote(System.properties.'path.separator')
+////                def jd = Pattern.quote(file("$buildDir/classes/java/main") as String)
+//                def jt = Pattern.quote(file("$buildDir/classes/java/test") as String)
+////                def rd = Pattern.quote(file("$buildDir/resources/main") as String)
+//                def rt = Pattern.quote(file("$buildDir/resources/test") as String)
+//                args[modulePathIndex] = args[modulePathIndex]
+////                        .replaceFirst(/(?:$ps|^)$rd/, '')
+//                        .replaceFirst(/(?:$ps|^)$rt/, '')
+////                        .replaceFirst(/(?:$ps|^)$jd/, Matcher.quoteReplacement(temporaryDir as String))
+//                        .replaceFirst(/(?:$ps|^)$jt/, Matcher.quoteReplacement(temporaryDir as String))
+//                jvmArgs = args
+//                project.sync {
+//                    from compileJava
+//                    from compileKotlin
+//                    from processResources
+//                    into temporaryDir
+//                }
+//                classpath = files()
+//            }
+//        }
     }
 }
 
+/**
+ * use ./gradlew wrapper when version change
+ */
 wrapper {
-    gradleVersion = '4.8'
+    gradleVersion = '4.8.1'
     distributionType = Wrapper.DistributionType.ALL
 }

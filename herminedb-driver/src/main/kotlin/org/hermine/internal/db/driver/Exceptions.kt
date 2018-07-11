@@ -4,8 +4,8 @@
  * Use of this source code is governed by the Apache 2.0 license.
  */
 
-module org.hermine.io {
-    requires kotlin.stdlib;
-    requires atomicfu;
-    exports org.hermine.io.tcp.client;
-}
+package org.hermine.internal.db.driver
+
+import java.util.concurrent.CompletionException
+
+internal fun Throwable.unwrapException() = if (this is CompletionException) this.cause else this
