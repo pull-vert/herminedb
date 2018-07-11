@@ -1,25 +1,17 @@
 /*
- * Copyright 2018 HermineDB's author : Frédéric Montariol,
- * and explicitly declared author of this file if provided.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2018 HermineDB's author : Frédéric Montariol
+ * and explicitly declared author of each file if specified.
+ * Use of this source code is governed by the Apache 2.0 license.
  */
+
 module org.herminedb.driver {
     requires jdk.incubator.adba;
-    requires reactor.core;
-    requires reactor.extra;
-    requires org.reactivestreams;
     requires org.apache.logging.log4j;
+    requires org.slf4j;
+    requires kotlin.stdlib;
+    requires kotlin.logging;
+    requires kotlinx.coroutines.core;
+    requires kotlinx.coroutines.jdk8;
     exports org.hermine.db.driver;
     provides jdk.incubator.sql2.DataSourceFactory with org.hermine.db.driver.HermineDataSourceFactory;
 }

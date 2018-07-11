@@ -1,3 +1,9 @@
+/*
+ * Copyright 2018 HermineDB's author : Frédéric Montariol
+ * and explicitly declared author of each file if specified.
+ * Use of this source code is governed by the Apache 2.0 license.
+ */
+
 plugins {
     id "io.morethan.jmhreport" version "0.7.0"
 }
