@@ -15,7 +15,7 @@ import kotlin.coroutines.experimental.CoroutineContext
 internal class ConnectionImpl(
         dataSource: DataSourceImpl,
         properties: Map<ConnectionProperty, Any>
-) : SequentialOperationGroup<Any?, Any>(), Connection {
+) : OperationGroupImpl<Any?, Any>(), Connection {
 
     override val context: CoroutineContext
 

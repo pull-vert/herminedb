@@ -29,18 +29,18 @@ internal abstract class AbstractOperation<T> : Operation<T> {
 
     // internal state
     private val connection: ConnectionImpl
-    private val group: AbstractOperationGroup<T, *>
+    private val group: OperationGroupImpl<T, *>
     protected var operationLifecycle = OperationLifecycle.MUTABLE
 
     // used only by Session
     constructor () {
         connection = this as ConnectionImpl
-        group = this as AbstractOperationGroup<T, *>
+        group = this as OperationGroupImpl<T, *>
     }
 
-    constructor(connection: ConnectionImpl, group: AbstractOperationGroup<*, *>) {
+    constructor(connection: ConnectionImpl, group: OperationGroupImpl<*, *>) {
         this.connection = connection
-        this.group = group as AbstractOperationGroup<T, *>
+        this.group = group as OperationGroupImpl<T, *>
     }
 
     override fun onError(handler: Consumer<Throwable>?): AbstractOperation<T> {

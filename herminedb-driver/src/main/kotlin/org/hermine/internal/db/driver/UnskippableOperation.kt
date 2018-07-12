@@ -16,7 +16,7 @@ private val logger = KotlinLogging.logger {}
 
 internal class UnskippableOperation<T>(
         conn: ConnectionImpl,
-        operationGroup: AbstractOperationGroup<in T, *>,
+        operationGroup: OperationGroupImpl<in T, *>,
         override val action: (AbstractOperation<T>) -> T
 ): SimpleOperation<T>(conn, operationGroup, action) {
 

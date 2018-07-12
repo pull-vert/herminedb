@@ -16,7 +16,7 @@ import kotlin.coroutines.experimental.CoroutineContext
  */
 internal open class SimpleOperation<T>(
         conn: ConnectionImpl,
-        operationGroup: AbstractOperationGroup<in T, *>,
+        operationGroup: OperationGroupImpl<in T, *>,
         open val action: (AbstractOperation<T>) -> T
 ) : AbstractOperation<T>(conn, operationGroup), () -> T {
 
