@@ -8,6 +8,7 @@ package org.hermine.internal.db.driver
 
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.channels.Channel
 import kotlin.coroutines.experimental.CoroutineContext
 
 /**
@@ -20,9 +21,10 @@ internal open class SimpleOperation<T>(
         open val action: (AbstractOperation<T>) -> T
 ) : AbstractOperation<T>(conn, operationGroup), () -> T {
 
-    override fun follows(predecessor: Deferred<*>?, context: CoroutineContext) = async(context) {
-        predecessor?.await()
-        invoke()
+    override fun next(channel: Channel<T>, context: CoroutineContext) = async(context) {
+        val value = invoke()
+        channel.send(value)
+        value
     }
 
     /**

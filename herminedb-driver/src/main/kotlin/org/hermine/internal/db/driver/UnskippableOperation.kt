@@ -8,6 +8,7 @@ package org.hermine.internal.db.driver
 
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.channels.Channel
 import mu.KotlinLogging
 import kotlin.coroutines.experimental.CoroutineContext
 
@@ -20,10 +21,11 @@ internal class UnskippableOperation<T>(
         override val action: (AbstractOperation<T>) -> T
 ): SimpleOperation<T>(conn, operationGroup, action) {
 
-    override fun follows(predecessor: Deferred<*>?, context: CoroutineContext) = async(context) {
-        predecessor?.await()
+    override fun next(channel: Channel<T>, context: CoroutineContext) = async(context) {
         try {
-            invoke()
+            val value = invoke()
+            channel.send(value)
+            value
         } catch (ex: Throwable) {
             if (errorHandler != null) errorHandler?.invoke(ex)
             throw ex

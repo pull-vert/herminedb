@@ -11,6 +11,7 @@ import jdk.incubator.sql2.Operation
 import jdk.incubator.sql2.SqlSkippedException
 import jdk.incubator.sql2.SqlType
 import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.channels.Channel
 import mu.KotlinLogging
 import java.math.BigInteger
 import java.time.*
@@ -81,12 +82,12 @@ internal abstract class AbstractOperation<T> : Operation<T> {
     fun getTimeoutMillis() = timeout?.get(ChronoUnit.MILLIS) ?: 0L
 
     override fun submit(): SubmissionImpl<T> {
-        logger.debug{"AbstractOperation#submit"}
+        logger.debug{"AbstractOperation#submitOperation"}
         if (isImmutable()) {
             throw IllegalStateException("TODO")
         }
         immutable()
-        return group.submit(this)
+        return group.submitOperation(this)
     }
 
     open val context: CoroutineContext
@@ -94,22 +95,22 @@ internal abstract class AbstractOperation<T> : Operation<T> {
 
 
     /**
-     * Attaches the Deferred that starts this Operation to the tail and
+     * Attaches the Deferred that starts this Operation to the predecessor and
      * return a Deferred that represents completion of this Operation.
-     * The returned Deferred may not be directly attached to the tail,
-     * but completion of the tail should result in completion of the returned
+     * The returned Deferred may not be directly attached to the predecessor,
+     * but completion of the predecessor should result in completion of the returned
      * Deferred. (Note: Not quite true for OperationGroups submitted by
      * calling submitHoldingForMoreMembers. While the returned Deferred
-     * does depend on the tail, it also depends on user code calling
+     * does depend on the predecessor, it also depends on user code calling
      * releaseProhibitingMoreMembers.)
      *
-     * @param tail the predecessor of this operation. Completion of tail starts
+     * @param predecessor the predecessor of this operation. Completion of predecessor starts
      * execution of this Operation
      * @param context used for asynchronous execution
-     * @return completion of this Deferred means this Operation is
-     * complete. The result value of the Operation is the value of the Deferred.
+     * @return completion of this Deferred means this Operation is complete.
+     * The result value of the Operation is the value of the Deferred.
      */
-    internal abstract fun follows(predecessor: Deferred<*>?, context: CoroutineContext): Deferred<T?>
+    internal abstract fun next(channel: Channel<T>, context: CoroutineContext): Deferred<T?>
 
     protected fun cancel(): Boolean {
         if (operationLifecycle.isFinished) {
@@ -120,9 +121,9 @@ internal abstract class AbstractOperation<T> : Operation<T> {
         }
     }
 
-    fun isCanceled() = operationLifecycle.isCanceled
+    private fun isCanceled() = operationLifecycle.isCanceled
 
-    fun checkCanceled(): AbstractOperation<T> {
+    protected fun checkCanceled(): AbstractOperation<T> {
         if (isCanceled()) {
             throw SqlSkippedException("TODO", null, null, -1, null, -1)
         }
@@ -136,7 +137,7 @@ internal abstract class AbstractOperation<T> : Operation<T> {
      * @param result A Deferred that may complete exceptionally
      * @return a Deferred that will call the errorHandle if any.
      */
-    fun attachErrorHandler(result: Deferred<T?>): Deferred<T?> {
+    internal fun attachErrorHandler(result: Deferred<T?>): Deferred<T?> {
         logger.debug{"AbstractOperation#attachErrorHandler"}
         if (null != errorHandler) {
             result.invokeOnCompletion {

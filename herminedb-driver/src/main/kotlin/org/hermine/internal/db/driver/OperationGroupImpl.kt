@@ -10,6 +10,7 @@ import jdk.incubator.sql2.*
 import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.future.asDeferred
 import mu.KotlinLogging
 import java.time.Duration
@@ -40,20 +41,15 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
 
     protected var condition: Deferred<Boolean> = DEFAULT_CONDITION
 
-    var submission: SubmissionImpl<T>? = null
+    lateinit var submission: SubmissionImpl<T>
     var accumulator: Any? = null
 
     var isIndependent: Boolean = false
     var isParallel: Boolean = false
     protected var collector: Collector<*, *, *> = DEFAULT_COLLECTOR
 
-//    /**
-//     * predecessor of all member Operations and the OperationGroup itself
-//     */
-//    protected val head: CompletableDeferred<Any?> = CompletableDeferred()
-
     /**
-     * completed when this OperationGroup is no longer held. Completion of this
+     * Completed when this OperationGroup is no longer held. Completion of this
      * OperationGroup depends on held.
      *
      * @see #submit,
@@ -63,9 +59,9 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
     private val held: CompletableDeferred<Unit> = CompletableDeferred()
 
     /**
-     * The last Deferred of any submitted member Operation. Mutable until not isHeld().
+     * Channel of all submitted member Operations. Mutable until not isHeld().
      */
-    protected var memberTail: Deferred<*>? = null
+    protected var operationChannel: Channel<S> = Channel()
 
     override fun parallel(): OperationGroupImpl<S, T> {
         if (isImmutable() || isParallel) throw IllegalStateException("TODO")
@@ -95,9 +91,8 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
     override fun submitHoldingForMoreMembers(): SubmissionImpl<T> {
         if (isImmutable() || !isHeld()) throw IllegalStateException("TODO")  //TODO prevent multiple calls
         accumulator = collector.supplier().get()
-        val newSubmission = super.submit()
-        submission = newSubmission
-        return newSubmission
+        submission = super.submit()
+        return submission
     }
 
     override fun catchOperation(): AbstractOperation<S> {
@@ -162,7 +157,7 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
     }
 
     override fun releaseProhibitingMoreMembers(): SubmissionImpl<T> {
-        logger.debug{"SequentialOperationGroup#releaseProhibitingMoreMembers"}
+        logger.debug { "SequentialOperationGroup#releaseProhibitingMoreMembers" }
         if (!isImmutable() || !isHeld()) throw IllegalStateException("TODO")
         held.complete(Unit)
         immutable()  // having set isHeld to false this call will make this OpGrp immutable
@@ -182,7 +177,7 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
     }
 
     override fun submit(): SubmissionImpl<T> {
-        logger.debug{"AbstractOperationGroup#submit"}
+        logger.debug { "OperationGroupImpl#submitOperation" }
         if (isImmutable()) throw IllegalStateException("TODO")
         accumulator = collector.supplier().get()
         held.complete(Unit)
@@ -191,20 +186,18 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
 
     // Internal methods
 
-    fun submit(op: AbstractOperation<S>): SubmissionImpl<S> {
-        logger.debug{"AbstractOperationGroup#submit"}
-        val newTail = op.attachErrorHandler(op.follows(memberTail, context))
-        memberTail = newTail
-        return SubmissionImpl(this::cancel, newTail)
+    internal fun submitOperation(op: AbstractOperation<S>): SubmissionImpl<S> {
+        logger.debug { "OperationGroupImpl#submitOperation" }
+        return SubmissionImpl(this::cancel,
+                op.attachErrorHandler(op.next(operationChannel, context)))
     }
 
-    override fun follows(predecessor: Deferred<*>?, context: CoroutineContext): Deferred<T?> {
-        logger.debug{"SequentialOperationGroup#follows"}
+    override fun next(channel: Channel<T>, context: CoroutineContext): Deferred<T?> {
+        logger.debug { "OperationGroupImpl#next" }
         return async(context) {
             val cond = condition.await()
             if (cond) {
-//                head.complete(predecessor)
-                held.await()
+                held.await() // wait until submit or releaseProhibitingMoreMembers
                 (collector.finisher() as Function<Any?, Any>)
                         .apply(accumulator) as T
             } else {
