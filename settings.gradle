@@ -6,6 +6,7 @@
 
 rootProject.name = 'herminedb'
 
+include 'hermine-adba-kotlin'
 include 'hermine-io'
 
 include 'herminedb-engine'

@@ -4,7 +4,7 @@
  * Use of this source code is governed by the Apache 2.0 license.
  */
 
-ext.moduleName='org.herminedb.driver'
+ext.moduleName='org.hermine.adba.kotlin'
 
 repositories {
     maven { setUrl("https://dl.bintray.com/pull-vert/adba") }
