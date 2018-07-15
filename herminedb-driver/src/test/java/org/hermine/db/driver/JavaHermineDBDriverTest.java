@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HermineDBDriverTest {
+public class JavaHermineDBDriverTest {
 
     private static final String URL = "<database connect string>";
     private static final String USER = "<database user name>";
@@ -27,7 +27,7 @@ public class HermineDBDriverTest {
 
     private static final String FACTORY_NAME = "org.hermine.db.driver.HermineDataSourceFactory";
 
-    private static final Logger LOGGER = LogManager.getLogger(HermineDBDriverTest.class);
+    private static final Logger LOGGER = LogManager.getLogger(JavaHermineDBDriverTest.class);
 
     @Test
     @Disabled

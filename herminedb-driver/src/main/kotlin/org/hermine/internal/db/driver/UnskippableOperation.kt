@@ -6,7 +6,6 @@
 
 package org.hermine.internal.db.driver
 
-import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.channels.Channel
 import mu.KotlinLogging
