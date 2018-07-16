@@ -6,32 +6,32 @@
 
 package org.hermine.internal.db.driver
 
-import jdk.incubator.sql2.Connection
-import jdk.incubator.sql2.ConnectionProperty
+import jdk.incubator.sql2.Session
+import jdk.incubator.sql2.SessionProperty
 import jdk.incubator.sql2.DataSource
 
 /**
-* Bare bones DataSource. No support for Connection caching.
+* Bare bones DataSource. No support for Session caching.
 */
 internal class DataSourceImpl(
-        private val defaultConnectionProperties: Map<ConnectionProperty, Any>,
-        private val requiredConnectionProperties: Map<ConnectionProperty, Any>
+        private val defaultSessionProperties: Map<SessionProperty, Any>,
+        private val requiredSessionProperties: Map<SessionProperty, Any>
 ) : DataSource {
 
-    private val openConnections = hashSetOf<Connection>()
+    private val openSessions = hashSetOf<Session>()
 
-    override fun builder(): Connection.Builder =
-            ConnectionBuilderImpl(this, defaultConnectionProperties, requiredConnectionProperties)
+    override fun builder(): Session.Builder =
+            SessionBuilderImpl(this, defaultSessionProperties, requiredSessionProperties)
 
-    override fun close() = openConnections.forEach(Connection::close)
+    override fun close() = openSessions.forEach(Session::close)
 
-    fun registerConnection(c: Connection): DataSourceImpl {
-        openConnections.add(c)
+    fun registerSession(c: Session): DataSourceImpl {
+        openSessions.add(c)
         return this
     }
 
-    fun deregisterConnection(c: Connection): DataSourceImpl {
-        openConnections.remove(c)
+    fun deregisterSession(c: Session): DataSourceImpl {
+        openSessions.remove(c)
         return this
     }
 }

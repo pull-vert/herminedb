@@ -29,18 +29,18 @@ internal abstract class AbstractOperation<T> : Operation<T> {
     protected var errorHandler: ((Throwable) -> Unit)? = null
 
     // internal state
-    private val connection: ConnectionImpl
+    private val session: SessionImpl
     private val group: OperationGroupImpl<T, *>
     protected var operationLifecycle = OperationLifecycle.MUTABLE
 
     // used only by Session
     constructor () {
-        connection = this as ConnectionImpl
+        session = this as SessionImpl
         group = this as OperationGroupImpl<T, *>
     }
 
-    constructor(connection: ConnectionImpl, group: OperationGroupImpl<*, *>) {
-        this.connection = connection
+    constructor(session: SessionImpl, group: OperationGroupImpl<*, *>) {
+        this.session = session
         this.group = group as OperationGroupImpl<T, *>
     }
 
@@ -91,7 +91,7 @@ internal abstract class AbstractOperation<T> : Operation<T> {
     }
 
     open val context: CoroutineContext
-        get() = connection.context
+        get() = session.context
 
 
     /**

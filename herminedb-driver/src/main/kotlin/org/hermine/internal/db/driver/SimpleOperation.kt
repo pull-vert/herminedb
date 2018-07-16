@@ -6,7 +6,6 @@
 
 package org.hermine.internal.db.driver
 
-import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlin.coroutines.experimental.CoroutineContext
@@ -16,7 +15,7 @@ import kotlin.coroutines.experimental.CoroutineContext
  * @param <T>
  */
 internal open class SimpleOperation<T>(
-        conn: ConnectionImpl,
+        conn: SessionImpl,
         operationGroup: OperationGroupImpl<in T, *>,
         open val action: (AbstractOperation<T>) -> T
 ) : AbstractOperation<T>(conn, operationGroup), () -> T {

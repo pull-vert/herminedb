@@ -6,31 +6,31 @@
 
 package org.hermine.internal.db.driver
 
-import jdk.incubator.sql2.Connection
-import jdk.incubator.sql2.ConnectionProperty
+import jdk.incubator.sql2.Session
+import jdk.incubator.sql2.SessionProperty
 import mu.KotlinLogging
 
 // Place definition above class declaration to make field static
 private val logger = KotlinLogging.logger {}
 
-internal class ConnectionBuilderImpl(
+internal class SessionBuilderImpl(
         val dataSource: DataSourceImpl,
-        defaultConnectionProperties: Map<ConnectionProperty, Any>,
-        specifiedConnectionProperties: Map<ConnectionProperty, Any>
-) : Connection.Builder {
+        defaultSessionProperties: Map<SessionProperty, Any>,
+        specifiedSessionProperties: Map<SessionProperty, Any>
+) : Session.Builder {
 
     private var isBuilt = false
-    private val defaultProperties: MutableMap<ConnectionProperty, Any>
-    private val requiredProperties: MutableMap<ConnectionProperty, Any>
+    private val defaultProperties: MutableMap<SessionProperty, Any>
+    private val requiredProperties: MutableMap<SessionProperty, Any>
 
     init {
-        defaultProperties = HashMap(defaultConnectionProperties)
-        requiredProperties = HashMap(specifiedConnectionProperties)
+        defaultProperties = HashMap(defaultSessionProperties)
+        requiredProperties = HashMap(specifiedSessionProperties)
     }
 
-    override fun property(property: ConnectionProperty, value: Any): ConnectionBuilderImpl {
+    override fun property(property: SessionProperty, value: Any): SessionBuilderImpl {
         if (isBuilt) {
-            throw IllegalStateException("The Connection was already buit")
+            throw IllegalStateException("The Session was already buit")
         }
         if (requiredProperties.containsKey(property)) {
             throw IllegalArgumentException("cannot override required properties")
@@ -42,13 +42,13 @@ internal class ConnectionBuilderImpl(
         return this
     }
 
-    override fun build(): Connection {
-        if (isBuilt) throw IllegalStateException("The Connection was already buit")
+    override fun build(): Session {
+        if (isBuilt) throw IllegalStateException("The Session was already buit")
         isBuilt = true
         // replace default values with specified values where provided
         // otherwise use defaults
         defaultProperties.putAll(requiredProperties)
-        logger.debug{"Creating ConnectionImpl"}
-        return ConnectionImpl(dataSource, defaultProperties)
+        logger.debug{"Creating SessionImpl"}
+        return SessionImpl(dataSource, defaultProperties)
     }
 }

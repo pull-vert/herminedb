@@ -15,7 +15,7 @@ import kotlin.coroutines.experimental.CoroutineContext
 private val logger = KotlinLogging.logger {}
 
 internal class UnskippableOperation<T>(
-        conn: ConnectionImpl,
+        conn: SessionImpl,
         operationGroup: OperationGroupImpl<in T, *>,
         override val action: (AbstractOperation<T>) -> T
 ): SimpleOperation<T>(conn, operationGroup, action) {

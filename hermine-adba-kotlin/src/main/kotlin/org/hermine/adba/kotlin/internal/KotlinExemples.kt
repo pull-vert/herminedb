@@ -24,8 +24,8 @@ fun getDataSource(url: String, user: String, pass: String): DataSource {
 // RowCountOperation
 
 fun insertItem(ds: DataSource, item: Item) {
-    ds.connection.use { conn -> // 'use' will close connection automatically
-        conn.rowCountOperation<Any>("insert into tab values (:id, :name, :answer)")
+    ds.session.use { session -> // 'use' will close session automatically
+        session.rowCountOperation<Any>("insert into tab values (:id, :name, :answer)")
                 .set("id", item.id, AdbaType.NUMERIC)
                 .set("name", item.name, AdbaType.VARCHAR)
                 .set("answer", item.answer, AdbaType.NUMERIC)
@@ -36,8 +36,8 @@ fun insertItem(ds: DataSource, item: Item) {
 // RowOperation
 
 fun idsForAnswer(ds: DataSource, result: MutableList<Int>, correctAnswer: Int) {
-    ds.connection.use { conn ->
-        conn.rowOperation<List<Int>>("select id, name, answer from tab where answer = :target")
+    ds.session.use { session ->
+        session.rowOperation<List<Int>>("select id, name, answer from tab where answer = :target")
                 .set("target", correctAnswer, AdbaType.NUMERIC)
                 .collect({ result },
                         { list, row -> list.add(row.getAt("id")) }) // Generic Int type is inferred ! No need here to write row.getAt<Int>("id")

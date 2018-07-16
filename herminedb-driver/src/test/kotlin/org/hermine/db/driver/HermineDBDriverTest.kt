@@ -6,7 +6,7 @@
 
 package org.hermine.db.driver
 
-import jdk.incubator.sql2.Connection
+import jdk.incubator.sql2.Session
 import jdk.incubator.sql2.DataSourceFactory
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
@@ -38,7 +38,7 @@ class HermineDBDriverTest {
     }
 
     @Test
-    fun `Verify that can create a DataSource, though not a Connection, Should work even if there is no database`() {
+    fun `Verify that can create a DataSource, though not a Session, Should work even if there is no database`() {
         // Given
         val factory = HermineDataSourceFactory()
 
@@ -56,7 +56,7 @@ class HermineDBDriverTest {
     }
 
     @Test
-    fun `Verify that can create a Connection, Should work even if there is no database`() {
+    fun `Verify that can create a Session, Should work even if there is no database`() {
         // Given
         val factory = HermineDataSourceFactory()
 
@@ -66,12 +66,12 @@ class HermineDBDriverTest {
                 .username(USER)
                 .password(PASSWORD)
                 .build()
-        ds.getConnection { println("ERROR: " + it.message) }.use { conn ->
+        ds.getSession { println("ERROR: " + it.message) }.use { session ->
             // Then
-            assertThat(conn)
-                    .`as`("Verify that Connection is created.")
+            assertThat(session)
+                    .`as`("Verify that Session is created.")
                     .isNotNull()
-            logger.info("connection class = {}", conn.javaClass)
+            logger.info("Session class = {}", session.javaClass)
         }
     }
 }

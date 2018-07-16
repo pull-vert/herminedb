@@ -7,15 +7,16 @@
 package org.hermine.internal.db.driver
 
 import jdk.incubator.sql2.*
-import jdk.incubator.sql2.Connection.Lifecycle
+import jdk.incubator.sql2.Session.Lifecycle
 import java.time.Duration
 import java.util.function.Consumer
+import java.util.function.LongConsumer
 import kotlin.coroutines.experimental.CoroutineContext
 
-internal class ConnectionImpl(
+internal class SessionImpl(
         dataSource: DataSourceImpl,
-        properties: Map<ConnectionProperty, Any>
-) : OperationGroupImpl<Any?, Any>(), Connection {
+        properties: Map<SessionProperty, Any>
+) : OperationGroupImpl<Any?, Any>(), Session {
 
     override val context: CoroutineContext
 
@@ -25,12 +26,12 @@ internal class ConnectionImpl(
     }
 
     // PUBLIC
-    override fun connectOperation(): AbstractOperation<Void?> {
+    override fun attachOperation(): AbstractOperation<Void?> {
         if (!isHeld()) throw IllegalStateException("TODO")
         return SimpleOperation(this, this, this::hermineConnect)
     }
 
-    override fun validationOperation(depth: Connection.Validation?): Operation<Void> {
+    override fun validationOperation(depth: Session.Validation?): Operation<Void> {
         if (!isHeld()) throw IllegalStateException("TODO")
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -45,28 +46,28 @@ internal class ConnectionImpl(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun transaction(): Transaction {
+    override fun transactionCompletion(): TransactionCompletion {
         if (!isHeld()) throw IllegalStateException("TODO")
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun registerLifecycleListener(listener: Connection.ConnectionLifecycleListener?): Connection {
+    override fun registerLifecycleListener(listener: Session.SessionLifecycleListener?): Session {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun deregisterLifecycleListener(listener: Connection.ConnectionLifecycleListener?): Connection {
+    override fun deregisterLifecycleListener(listener: Session.SessionLifecycleListener?): Session {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getConnectionLifecycle(): Lifecycle {
+    override fun getSessionLifecycle(): Lifecycle {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun abort(): Connection {
+    override fun abort(): Session {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getProperties(): MutableMap<ConnectionProperty, Any> {
+    override fun getProperties(): MutableMap<SessionProperty, Any> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -74,32 +75,32 @@ internal class ConnectionImpl(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun requestHook(request: Consumer<Long>?): Connection {
+    override fun requestHook(request: LongConsumer?): Session {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun activate(): Connection {
+    override fun activate(): Session {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun deactivate(): Connection {
+    override fun deactivate(): Session {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     // Override Operation methods
 
-    override fun timeout(minTime: Duration): ConnectionImpl {
+    override fun timeout(minTime: Duration): SessionImpl {
         super.timeout(minTime)
         return this
     }
 
-    override fun onError(handler: Consumer<Throwable>): ConnectionImpl {
+    override fun onError(handler: Consumer<Throwable>): SessionImpl {
         super.onError(handler)
         return this
     }
 
     // INTERNAL
-    protected fun setLifecycle(next: Lifecycle): ConnectionImpl {
+    protected fun setLifecycle(next: Lifecycle): SessionImpl {
         return this
     }
 

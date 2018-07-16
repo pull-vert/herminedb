@@ -6,24 +6,24 @@
 
 package org.hermine.internal.db.driver
 
-import jdk.incubator.sql2.ConnectionProperty
+import jdk.incubator.sql2.SessionProperty
 import kotlinx.coroutines.experimental.DefaultDispatcher
 import java.util.function.Function
 import kotlin.coroutines.experimental.CoroutineContext
 
-internal object CONTEXT : HermineConnectionProperty(
+internal object CONTEXT : HermineSessionProperty(
         "CONTEXT",
         CoroutineContext::class.java,
         Function { v -> v is CoroutineContext },
         DefaultDispatcher,
         false)
 
-internal abstract class HermineConnectionProperty(
+internal abstract class HermineSessionProperty(
         val name: String,
         val range: Class<*>,
         val validator: Function<Any, Boolean>,
         val defaultValue: Any,
-        val sensitive: Boolean) : ConnectionProperty {
+        val sensitive: Boolean) : SessionProperty {
 
     override fun name() = name
 

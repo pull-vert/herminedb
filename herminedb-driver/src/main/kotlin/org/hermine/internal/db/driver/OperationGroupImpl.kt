@@ -37,7 +37,7 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
     // used only by Session. Will break if used by any other class.
     constructor() : super()
 
-    constructor(conn: ConnectionImpl, group: OperationGroupImpl<in T, *>) : super(conn, group)
+    constructor(conn: SessionImpl, group: OperationGroupImpl<in T, *>) : super(conn, group)
 
     protected var condition: Deferred<Boolean> = DEFAULT_CONDITION
 
@@ -142,7 +142,7 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
         throw UnsupportedOperationException("Not supported yet.")
     }
 
-    override fun endTransactionOperation(trans: Transaction): AbstractOperation<TransactionOutcome> {
+    override fun endTransactionOperation(trans: TransactionCompletion): AbstractOperation<TransactionOutcome> {
         if (!isHeld()) throw IllegalStateException("TODO")
         throw UnsupportedOperationException("Not supported yet.")
     }

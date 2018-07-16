@@ -12,6 +12,7 @@ module org.herminedb.driver {
     requires kotlin.logging;
     requires kotlinx.coroutines.core;
     requires kotlinx.coroutines.jdk8;
+    requires kotlin.stdlib.jdk8;
     exports org.hermine.db.driver;
     provides jdk.incubator.sql2.DataSourceFactory with org.hermine.db.driver.HermineDataSourceFactory;
 }

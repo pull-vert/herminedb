@@ -6,7 +6,7 @@
 
 package org.hermine.db.driver;
 
-import jdk.incubator.sql2.Connection;
+import jdk.incubator.sql2.Session;
 import jdk.incubator.sql2.DataSource;
 import jdk.incubator.sql2.DataSourceFactory;
 import org.apache.logging.log4j.LogManager;
@@ -45,7 +45,7 @@ public class JavaHermineDBDriverTest {
     }
 
     @Test
-    @DisplayName("Verify that can create a DataSource, though not a Connection. Should work even if there is no database.")
+    @DisplayName("Verify that can create a DataSource, though not a Session. Should work even if there is no database.")
     public void createDataSource() {
         // Given
         DataSourceFactory factory = new HermineDataSourceFactory();
@@ -64,8 +64,8 @@ public class JavaHermineDBDriverTest {
     }
 
     @Test
-    @DisplayName("Verify that can create a Connection. Should work even if there is no database.")
-    public void createConnection() {
+    @DisplayName("Verify that can create a Session. Should work even if there is no database.")
+    public void createSession() {
         // Given
         DataSourceFactory factory = new HermineDataSourceFactory();
 
@@ -75,12 +75,12 @@ public class JavaHermineDBDriverTest {
                 .username(USER)
                 .password(PASSWORD)
                 .build();
-        try (Connection conn = ds.getConnection(t -> System.out.println("ERROR: " + t.getMessage()))) {
+        try (Session session = ds.getSession(t -> System.out.println("ERROR: " + t.getMessage()))) {
             // Then
-            assertThat(conn)
-                    .as("Verify that Connection is created.")
+            assertThat(session)
+                    .as("Verify that Session is created.")
                     .isNotNull();
-            LOGGER.info("connection class = {}", conn.getClass());
+            LOGGER.info("Session class = {}", session.getClass());
         }
     }
 }
