@@ -10,8 +10,10 @@ import jdk.incubator.sql2.AdbaType
 import jdk.incubator.sql2.Operation
 import jdk.incubator.sql2.SqlSkippedException
 import jdk.incubator.sql2.SqlType
+import kotlinx.coroutines.experimental.CoroutineStart
 import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.channels.Channel
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.async
 import mu.KotlinLogging
 import java.math.BigInteger
 import java.time.*
@@ -82,7 +84,7 @@ internal abstract class AbstractOperation<T> : Operation<T> {
     fun getTimeoutMillis() = timeout?.get(ChronoUnit.MILLIS) ?: 0L
 
     override fun submit(): SubmissionImpl<T> {
-        logger.debug{"AbstractOperation#submitOperation"}
+        logger.debug { "AbstractOperation#submit" }
         if (isImmutable()) {
             throw IllegalStateException("TODO")
         }
@@ -95,22 +97,45 @@ internal abstract class AbstractOperation<T> : Operation<T> {
 
 
     /**
-     * Attaches the Deferred that starts this Operation to the predecessor and
+     * Attaches the Deferred that starts this Operation to the tail and
      * return a Deferred that represents completion of this Operation.
-     * The returned Deferred may not be directly attached to the predecessor,
-     * but completion of the predecessor should result in completion of the returned
+     * The returned Deferred may not be directly attached to the tail,
+     * but completion of the tail should result in completion of the returned
      * Deferred. (Note: Not quite true for OperationGroups submitted by
      * calling submitHoldingForMoreMembers. While the returned Deferred
-     * does depend on the predecessor, it also depends on user code calling
+     * does depend on the tail, it also depends on user code calling
      * releaseProhibitingMoreMembers.)
      *
-     * @param predecessor the predecessor of this operation. Completion of predecessor starts
+     * @param tail the predecessor of this operation. Completion of tail starts
      * execution of this Operation
      * @param context used for asynchronous execution
-     * @return completion of this Deferred means this Operation is complete.
-     * The result value of the Operation is the value of the Deferred.
+     * @return completion of this Deferred means this Operation is
+     * complete. The result value of the Operation is the value of the Deferred.
      */
-    internal abstract fun next(channel: Channel<T>, context: CoroutineContext): Deferred<T?>
+    internal fun follows(
+            predecessor: Deferred<*>?,
+            context: CoroutineContext,
+            parallel: Boolean,
+            independent: Boolean,
+            parent: Job
+    ): Deferred<T?> {
+        return async(context, parent = parent, start = CoroutineStart.LAZY, onCompletion = {
+            it?.let {
+                // If not independant AND parent is not Cancelled then cancel the parent to Cancel all other Children operations
+                if (!independent && !parent.isCancelled) parent.cancel(it)
+
+                val ex = it.unwrapException()
+                errorHandler?.invoke(it)
+                if (ex is SqlSkippedException) throw ex
+                else throw SqlSkippedException("TODO", ex, null, -1, null, -1)
+            }
+        }) {
+            if (!parallel) predecessor?.await()
+            operate()
+        }
+    }
+
+    abstract suspend fun operate(): T?
 
     protected fun cancel(): Boolean {
         if (operationLifecycle.isFinished) {
@@ -128,28 +153,6 @@ internal abstract class AbstractOperation<T> : Operation<T> {
             throw SqlSkippedException("TODO", null, null, -1, null, -1)
         }
         return this
-    }
-
-    /**
-     * If an errorHandler is specified, invoke it in event the argument completes
-     * exceptionally. If there is no errorHandle specified, return the argument.
-     *
-     * @param result A Deferred that may complete exceptionally
-     * @return a Deferred that will call the errorHandle if any.
-     */
-    internal fun attachErrorHandler(result: Deferred<T?>): Deferred<T?> {
-        logger.debug{"AbstractOperation#attachErrorHandler"}
-        if (null != errorHandler) {
-            result.invokeOnCompletion {
-                it?.let {
-                    val ex = it.unwrapException()
-                    errorHandler?.invoke(it)
-                    if (ex is SqlSkippedException) throw ex
-                    else throw SqlSkippedException("TODO", ex, null, -1, null, -1)
-                }
-            }
-        }
-        return result
     }
 
     protected enum class OperationLifecycle {

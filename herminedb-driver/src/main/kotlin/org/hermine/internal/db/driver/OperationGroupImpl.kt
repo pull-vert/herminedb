@@ -9,8 +9,7 @@ package org.hermine.internal.db.driver
 import jdk.incubator.sql2.*
 import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.channels.Channel
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.future.asDeferred
 import mu.KotlinLogging
 import java.time.Duration
@@ -19,7 +18,6 @@ import java.util.function.*
 import java.util.function.Function
 import java.util.logging.Logger
 import java.util.stream.Collector
-import kotlin.coroutines.experimental.CoroutineContext
 
 // Place definition above class declaration to make field static
 private val logger = KotlinLogging.logger {}
@@ -37,7 +35,7 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
     // used only by Session. Will break if used by any other class.
     constructor() : super()
 
-    constructor(conn: SessionImpl, group: OperationGroupImpl<in T, *>) : super(conn, group)
+    constructor(session: SessionImpl, group: OperationGroupImpl<in T, *>) : super(session, group)
 
     protected var condition: Deferred<Boolean> = DEFAULT_CONDITION
 
@@ -56,12 +54,14 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
      * @see #releaseProhibitingMoreMembers,
      * @see #submitHoldingForMoreMembers
      */
-    private val held: CompletableDeferred<Unit> = CompletableDeferred()
+    private val held = CompletableDeferred<Unit>()
+
+    private val parentJob = Job()
 
     /**
-     * Channel of all submitted member Operations. Mutable until not isHeld().
+     * Last operation. Mutable until not isHeld().
      */
-    protected var operationChannel: Channel<S> = Channel()
+    protected var lastOp: Deferred<S?>? = null
 
     override fun parallel(): OperationGroupImpl<S, T> {
         if (isImmutable() || isParallel) throw IllegalStateException("TODO")
@@ -89,9 +89,12 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
     }
 
     override fun submitHoldingForMoreMembers(): SubmissionImpl<T> {
+        logger.debug { "OperationGroupImpl#submitHoldingForMoreMembers" }
         if (isImmutable() || !isHeld()) throw IllegalStateException("TODO")  //TODO prevent multiple calls
         accumulator = collector.supplier().get()
         submission = super.submit()
+        // start all operations
+        startOpJobs()
         return submission
     }
 
@@ -157,11 +160,13 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
     }
 
     override fun releaseProhibitingMoreMembers(): SubmissionImpl<T> {
-        logger.debug { "SequentialOperationGroup#releaseProhibitingMoreMembers" }
+        logger.debug { "OperationGroupImpl#releaseProhibitingMoreMembers" }
         if (!isImmutable() || !isHeld()) throw IllegalStateException("TODO")
+        // start all operations
+        startOpJobs()
         held.complete(Unit)
         immutable()  // having set isHeld to false this call will make this OpGrp immutable
-        return submission!!
+        return submission
     }
 
     // Override Operation methods
@@ -177,10 +182,12 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
     }
 
     override fun submit(): SubmissionImpl<T> {
-        logger.debug { "OperationGroupImpl#submitOperation" }
+        logger.debug { "OperationGroupImpl#submit" }
         if (isImmutable()) throw IllegalStateException("TODO")
         accumulator = collector.supplier().get()
         held.complete(Unit)
+        // start all operations
+        startOpJobs()
         return super.submit()
     }
 
@@ -188,23 +195,28 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
 
     internal fun submitOperation(op: AbstractOperation<S>): SubmissionImpl<S> {
         logger.debug { "OperationGroupImpl#submitOperation" }
-        return SubmissionImpl(this::cancel,
-                op.attachErrorHandler(op.next(operationChannel, context)))
+        val newLastOp = op.follows(lastOp, context, isParallel, isIndependent, parentJob)
+        lastOp = newLastOp
+        return SubmissionImpl(this::cancel, newLastOp)
     }
 
-    override fun next(channel: Channel<T>, context: CoroutineContext): Deferred<T?> {
-        logger.debug { "OperationGroupImpl#next" }
-        return async(context) {
-            val cond = condition.await()
-            if (cond) {
-                held.await() // wait until submit or releaseProhibitingMoreMembers
-                (collector.finisher() as Function<Any?, Any>)
-                        .apply(accumulator) as T
-            } else {
-                null
-            }
+    override suspend fun operate(): T? {
+        logger.debug { "OperationGroupImpl#operate" }
+        return if (condition.await()) {
+            held.await() // wait until submit or releaseProhibitingMoreMembers
+            (collector.finisher() as Function<Any?, Any>)
+                    .apply(accumulator) as T
+        } else {
+            null
         }
     }
 
     fun isHeld() = !held.isCompleted
+
+    private fun startOpJobs() {
+        for ((index, opJob) in parentJob.children.withIndex()) {
+            logger.debug { "start $index child operation job" }
+            opJob.start() // true if job was not started, false if job was started or completed
+        }
+    }
 }

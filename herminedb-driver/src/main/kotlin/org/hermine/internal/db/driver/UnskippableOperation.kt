@@ -6,28 +6,17 @@
 
 package org.hermine.internal.db.driver
 
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.channels.Channel
-import mu.KotlinLogging
-import kotlin.coroutines.experimental.CoroutineContext
-
-// Place definition above class declaration to make field static
-private val logger = KotlinLogging.logger {}
-
 internal class UnskippableOperation<T>(
         conn: SessionImpl,
         operationGroup: OperationGroupImpl<in T, *>,
         override val action: (AbstractOperation<T>) -> T
-): SimpleOperation<T>(conn, operationGroup, action) {
+) : SimpleOperation<T>(conn, operationGroup, action) {
 
-    override fun next(channel: Channel<T>, context: CoroutineContext) = async(context) {
-        try {
-            val value = invoke()
-            channel.send(value)
-            value
-        } catch (ex: Throwable) {
-            if (errorHandler != null) errorHandler?.invoke(ex)
-            throw ex
-        }
-    }
+    override suspend fun operate() =
+            try {
+                invoke()
+            } catch (ex: Throwable) {
+                if (errorHandler != null) errorHandler?.invoke(ex)
+                throw ex
+            }
 }
