@@ -12,7 +12,7 @@ import jdk.incubator.sql2.DataSourceFactory
 import org.hermine.adba.kotlin.getAt
 import org.hermine.adba.kotlin.newDataSourceFactory
 
-fun getDataSource(url: String, user: String, pass: String): DataSource {
+private fun getDataSource(url: String, user: String, pass: String): DataSource {
     return newDataSourceFactory<DataSourceFactory>("example.DataSourceFactory") // top level function
             .builder()
             .url(url)
@@ -23,7 +23,7 @@ fun getDataSource(url: String, user: String, pass: String): DataSource {
 
 // RowCountOperation
 
-fun insertItem(ds: DataSource, item: Item) {
+private fun insertItem(ds: DataSource, item: Item) {
     ds.session.use { session -> // 'use' will close session automatically
         session.rowCountOperation<Any>("insert into tab values (:id, :name, :answer)")
                 .set("id", item.id, AdbaType.NUMERIC)
@@ -35,7 +35,7 @@ fun insertItem(ds: DataSource, item: Item) {
 
 // RowOperation
 
-fun idsForAnswer(ds: DataSource, result: MutableList<Int>, correctAnswer: Int) {
+private fun idsForAnswer(ds: DataSource, result: MutableList<Int>, correctAnswer: Int) {
     ds.session.use { session ->
         session.rowOperation<List<Int>>("select id, name, answer from tab where answer = :target")
                 .set("target", correctAnswer, AdbaType.NUMERIC)
@@ -45,4 +45,4 @@ fun idsForAnswer(ds: DataSource, result: MutableList<Int>, correctAnswer: Int) {
     }
 }
 
-data class Item(var id: Int, var name: String, var answer: Int)
+private data class Item(var id: Int, var name: String, var answer: Int)

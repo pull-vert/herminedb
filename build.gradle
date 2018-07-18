@@ -28,8 +28,8 @@ subprojects {
         jcenter()
     }
 
-    sourceCompatibility = 10
-    targetCompatibility = 10
+    sourceCompatibility = 1.9
+    targetCompatibility = 1.9
 
     compileKotlin {
         kotlinOptions.jvmTarget = "1.8"
@@ -38,10 +38,6 @@ subprojects {
     compileTestKotlin {
         kotlinOptions.jvmTarget = "1.8"
         destinationDir = compileTestJava.destinationDir
-    }
-
-    tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
     }
 
     kotlin.experimental.coroutines "enable"
@@ -57,13 +53,11 @@ configure(subprojects.findAll { useKotlinxCoroutinesAndSlf4jAndJunit5.contains(i
 
     dependencies {
         compile("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$kotlinx_coroutines_version")
-        compile("org.apache.logging.log4j:log4j-api:$log4j_version")
-        compile("org.apache.logging.log4j:log4j-core:$log4j_version")
-        compile("org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version")
         compile("io.github.microutils:kotlin-logging:$kotlin_logging_version")
 
         testCompile("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
         testCompile("org.assertj:assertj-core:$assertj_version")
+        testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junit_version")
         testRuntimeOnly("org.apache.logging.log4j:log4j-jul:$log4j_version")
     }
@@ -213,6 +207,6 @@ configure(subprojects.findAll { !noModule.contains(it.name) }) {
  * use ./gradlew wrapper when version change
  */
 wrapper {
-    gradleVersion = '4.8.1'
+    gradleVersion = '4.9'
     distributionType = Wrapper.DistributionType.ALL
 }

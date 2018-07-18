@@ -6,8 +6,6 @@
 
 module org.herminedb.driver {
     requires jdk.incubator.adba;
-    requires org.apache.logging.log4j;
-    requires org.slf4j;
     requires kotlin.stdlib;
     requires kotlin.logging;
     requires kotlinx.coroutines.core;

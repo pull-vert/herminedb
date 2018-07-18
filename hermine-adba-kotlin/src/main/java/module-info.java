@@ -8,4 +8,5 @@ module org.hermine.adba.kotlin {
     requires jdk.incubator.adba;
     requires kotlin.stdlib.jdk7;
     requires kotlin.stdlib;
+    exports org.hermine.adba.kotlin;
 }

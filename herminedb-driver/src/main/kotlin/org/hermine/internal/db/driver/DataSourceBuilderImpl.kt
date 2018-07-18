@@ -6,16 +6,10 @@
 
 package org.hermine.internal.db.driver
 
-import jdk.incubator.sql2.SessionProperty
 import jdk.incubator.sql2.DataSource
 import jdk.incubator.sql2.DataSourceProperty
-import java.util.function.Consumer
+import jdk.incubator.sql2.SessionProperty
 import java.util.function.LongConsumer
-import java.util.HashMap
-import org.apache.logging.log4j.ThreadContext.containsKey
-
-
-
 
 
 internal class DataSourceBuilderImpl : DataSource.Builder {

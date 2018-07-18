@@ -6,7 +6,7 @@
 
 package org.hermine.db.driver
 
-import jdk.incubator.sql2.Session
+import jdk.incubator.sql2.AdbaType
 import jdk.incubator.sql2.DataSourceFactory
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
@@ -74,4 +74,30 @@ class HermineDBDriverTest {
             logger.info("Session class = {}", session.javaClass)
         }
     }
+
+    // RowCountOperation
+
+    @Test
+    @Disabled // todo Enable when rowCountOperation is supported
+    fun `Verify that can insert one row in a table`() {
+        // Given
+        val factory = HermineDataSourceFactory()
+        val item = Item(12, "luke", "who's your father ?")
+
+        // When
+        val ds = factory.builder()
+                .url(URL)
+                .username(USER)
+                .password(PASSWORD)
+                .build()
+        ds.getSession { println("ERROR: " + it.message) }.use { session ->
+            session.rowCountOperation<Any>("insert into tab values (:id, :name, :answer)")
+                    .set("id", item.id, AdbaType.NUMERIC)
+                    .set("name", item.name, AdbaType.VARCHAR)
+                    .set("answer", item.question, AdbaType.NUMERIC)
+                    .submit()
+        }
+    }
 }
+
+data class Item(var id: Int, var name: String, var question: String)

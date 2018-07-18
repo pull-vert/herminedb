@@ -6,14 +6,14 @@
 
 package org.hermine.db.driver;
 
-import jdk.incubator.sql2.Session;
 import jdk.incubator.sql2.DataSource;
 import jdk.incubator.sql2.DataSourceFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import jdk.incubator.sql2.Session;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,14 +27,14 @@ public class JavaHermineDBDriverTest {
 
     private static final String FACTORY_NAME = "org.hermine.db.driver.HermineDataSourceFactory";
 
-    private static final Logger LOGGER = LogManager.getLogger(JavaHermineDBDriverTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JavaHermineDBDriverTest.class);
 
     @Test
     @Disabled
     @DisplayName("Verify that DataSourceFactory.forName works. Can't do anything without that.")
     public void forName() {
         // When
-        var name = DataSourceFactory.newFactory(FACTORY_NAME).getClass().getName();
+        String name = DataSourceFactory.newFactory(FACTORY_NAME).getClass().getName();
 
         // Then
         assertThat(name)
