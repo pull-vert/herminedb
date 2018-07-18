@@ -46,7 +46,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * An HTTP request.
  *
  * <p> An {@code HttpRequest} instance is built through an {@code HttpRequest}
- * {@linkplain Builder builder}. An {@code HttpRequest} builder
+ * {@linkplain HttpRequest.Builder builder}. An {@code HttpRequest} builder
  * is obtained from one of the {@link HttpRequest#newBuilder(URI) newBuilder}
  * methods. A request's {@link URI}, headers, and body can be set. Request
  * bodies are provided through a {@link BodyPublisher BodyPublisher} supplied
@@ -90,7 +90,7 @@ public abstract class HttpRequest {
      * HttpRequest#newBuilder(URI)} or {@link HttpRequest#newBuilder()}.
      *
      * <p> The builder can be used to configure per-request state, such as: the
-     * request URI, the request method ( default is GET unless explicitly set ),
+     * request URI, the request method (default is GET unless explicitly set),
      * specific request headers, etc. Each of the setter methods modifies the
      * state of the builder and returns the same instance. The methods are not
      * synchronized and should not be called from multiple threads without
@@ -186,10 +186,10 @@ public abstract class HttpRequest {
         /**
          * Sets a timeout for this request. If the response is not received
          * within the specified timeout then an {@link HttpTimeoutException} is
-         * thrown from {@link HttpClient#send(HttpRequest,
-         * HttpResponse.BodyHandler) HttpClient::send} or
-         * {@link HttpClient#sendAsync(HttpRequest,
-         * HttpResponse.BodyHandler) HttpClient::sendAsync}
+         * thrown from {@link HttpClient#send(java.net.http.HttpRequest,
+         * java.net.http.HttpResponse.BodyHandler) HttpClient::send} or
+         * {@link HttpClient#sendAsync(java.net.http.HttpRequest,
+         * java.net.http.HttpResponse.BodyHandler) HttpClient::sendAsync}
          * completes exceptionally with an {@code HttpTimeoutException}. The effect
          * of not setting a timeout is the same as setting an infinite Duration, ie.
          * block forever.
@@ -295,7 +295,7 @@ public abstract class HttpRequest {
      * @return a new request builder
      * @throws IllegalArgumentException if the URI scheme is not supported.
      */
-    public static Builder newBuilder(URI uri) {
+    public static HttpRequest.Builder newBuilder(URI uri) {
         return new HttpRequestBuilderImpl(uri);
     }
 
@@ -304,7 +304,7 @@ public abstract class HttpRequest {
      *
      * @return a new request builder
      */
-    public static Builder newBuilder() {
+    public static HttpRequest.Builder newBuilder() {
         return new HttpRequestBuilderImpl();
     }
 
@@ -335,7 +335,7 @@ public abstract class HttpRequest {
     public abstract Optional<Duration> timeout();
 
     /**
-     * Returns this request's {@linkplain Builder#expectContinue(boolean)
+     * Returns this request's {@linkplain HttpRequest.Builder#expectContinue(boolean)
      * expect continue} setting.
      *
      * @return this request's expect continue setting
@@ -616,7 +616,7 @@ public abstract class HttpRequest {
          *
          * @param path the path to the file containing the body
          * @return a BodyPublisher
-         * @throws FileNotFoundException if the path is not found
+         * @throws java.io.FileNotFoundException if the path is not found
          * @throws SecurityException if a security manager has been installed
          *          and it denies {@link SecurityManager#checkRead(String)
          *          read access} to the given file

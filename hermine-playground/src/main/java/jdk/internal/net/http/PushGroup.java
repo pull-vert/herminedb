@@ -64,7 +64,7 @@ class PushGroup<T> {
     }
 
     // Check mainBodyHandler before calling nested constructor.
-    private PushGroup(PushPromiseHandler<T> pushPromiseHandler,
+    private PushGroup(HttpResponse.PushPromiseHandler<T> pushPromiseHandler,
                       HttpRequestImpl initiatingRequest,
                       CompletableFuture<HttpResponse<T>> mainResponse,
                       Executor executor) {
@@ -82,7 +82,7 @@ class PushGroup<T> {
 
     private static class AcceptorImpl<T> implements Acceptor<T> {
         private final Executor executor;
-        private volatile BodyHandler<T> bodyHandler;
+        private volatile HttpResponse.BodyHandler<T> bodyHandler;
         private volatile CompletableFuture<HttpResponse<T>> cf;
 
         AcceptorImpl(Executor executor) {

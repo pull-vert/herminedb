@@ -113,7 +113,7 @@ public class MessageQueue {
                             CompletableFuture<T> future)
             throws IOException
     {
-        add(Type.TEXT, null, null, message, isLast, -1, attachment,
+        add(MessageQueue.Type.TEXT, null, null, message, isLast, -1, attachment,
             action, future);
     }
 
@@ -163,7 +163,7 @@ public class MessageQueue {
                               CompletableFuture<? super T> future)
             throws IOException
     {
-        add(Type.BINARY, null, message, null, isLast, -1, attachment,
+        add(MessageQueue.Type.BINARY, null, message, null, isLast, -1, attachment,
             action, future);
     }
 
@@ -173,7 +173,7 @@ public class MessageQueue {
                             CompletableFuture<? super T> future)
             throws IOException
     {
-        add(Type.PING, null, message, null, false, -1, attachment,
+        add(MessageQueue.Type.PING, null, message, null, false, -1, attachment,
             action, future);
     }
 
@@ -183,7 +183,7 @@ public class MessageQueue {
                             CompletableFuture<? super T> future)
             throws IOException
     {
-        add(Type.PONG, null, message, null, false, -1, attachment,
+        add(MessageQueue.Type.PONG, null, message, null, false, -1, attachment,
             action, future);
     }
 
@@ -193,7 +193,7 @@ public class MessageQueue {
                             CompletableFuture<? super T> future)
             throws IOException
     {
-        add(Type.PONG, message, null, null, false, -1, attachment,
+        add(MessageQueue.Type.PONG, message, null, null, false, -1, attachment,
             action, future);
     }
 
@@ -204,7 +204,7 @@ public class MessageQueue {
                              CompletableFuture<? super T> future)
             throws IOException
     {
-        add(Type.CLOSE, null, null, reason, false, statusCode,
+        add(MessageQueue.Type.CLOSE, null, null, reason, false, statusCode,
             attachment, action, future);
     }
 

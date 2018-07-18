@@ -95,7 +95,7 @@ final class HttpClientFacade extends HttpClient implements Trackable {
     }
 
     @Override
-    public Version version() {
+    public HttpClient.Version version() {
         return impl.version();
     }
 
@@ -106,7 +106,7 @@ final class HttpClientFacade extends HttpClient implements Trackable {
 
     @Override
     public <T> HttpResponse<T>
-    send(HttpRequest req, BodyHandler<T> responseBodyHandler)
+    send(HttpRequest req, HttpResponse.BodyHandler<T> responseBodyHandler)
         throws IOException, InterruptedException
     {
         try {
@@ -118,7 +118,7 @@ final class HttpClientFacade extends HttpClient implements Trackable {
 
     @Override
     public <T> CompletableFuture<HttpResponse<T>>
-    sendAsync(HttpRequest req, BodyHandler<T> responseBodyHandler) {
+    sendAsync(HttpRequest req, HttpResponse.BodyHandler<T> responseBodyHandler) {
         try {
             return impl.sendAsync(req, responseBodyHandler);
         } finally {

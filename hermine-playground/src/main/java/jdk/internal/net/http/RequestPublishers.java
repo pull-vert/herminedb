@@ -59,7 +59,7 @@ public final class RequestPublishers {
     private RequestPublishers() { }
 
     public static class ByteArrayPublisher implements BodyPublisher {
-        private volatile Publisher<ByteBuffer> delegate;
+        private volatile Flow.Publisher<ByteBuffer> delegate;
         private final int length;
         private final byte[] content;
         private final int offset;
@@ -111,7 +111,7 @@ public final class RequestPublishers {
 
     // This implementation has lots of room for improvement.
     public static class IterablePublisher implements BodyPublisher {
-        private volatile Publisher<ByteBuffer> delegate;
+        private volatile Flow.Publisher<ByteBuffer> delegate;
         private final Iterable<byte[]> content;
         private volatile long contentLength;
 
@@ -206,7 +206,7 @@ public final class RequestPublishers {
     }
 
     public static class EmptyPublisher implements BodyPublisher {
-        private final Publisher<ByteBuffer> delegate =
+        private final Flow.Publisher<ByteBuffer> delegate =
                 new PullPublisher<ByteBuffer>(Collections.emptyList(), null);
 
         @Override

@@ -713,7 +713,7 @@ public final class QuickHuffman {
         private int bufferLen;
 
         @Override
-        public Writer from(CharSequence input, int start, int end) {
+        public QuickHuffman.Writer from(CharSequence input, int start, int end) {
             Objects.checkFromToIndex(start, end, input.length());
             this.pos = start;
             this.end = end;
@@ -764,7 +764,7 @@ public final class QuickHuffman {
         }
 
         @Override
-        public Writer reset() {
+        public QuickHuffman.Writer reset() {
             source = null;
             buffer = 0;
             bufferLen = 0;

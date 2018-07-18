@@ -69,7 +69,7 @@ public class ResponseSubscribers {
 
     public static class ConsumerSubscriber implements BodySubscriber<Void> {
         private final Consumer<Optional<byte[]>> consumer;
-        private Subscription subscription;
+        private Flow.Subscription subscription;
         private final CompletableFuture<Void> result = new MinimalFuture<>();
         private final AtomicBoolean subscribed = new AtomicBoolean();
 
@@ -83,7 +83,7 @@ public class ResponseSubscribers {
         }
 
         @Override
-        public void onSubscribe(Subscription subscription) {
+        public void onSubscribe(Flow.Subscription subscription) {
             if (!subscribed.compareAndSet(false, true)) {
                 subscription.cancel();
             } else {
@@ -131,7 +131,7 @@ public class ResponseSubscribers {
         private final FilePermission[] filePermissions;
         private final CompletableFuture<Path> result = new MinimalFuture<>();
 
-        private volatile Subscription subscription;
+        private volatile Flow.Subscription subscription;
         private volatile FileChannel out;
 
         private static final String pathForSecurityCheck(Path path) {
@@ -169,7 +169,7 @@ public class ResponseSubscribers {
         }
 
         @Override
-        public void onSubscribe(Subscription subscription) {
+        public void onSubscribe(Flow.Subscription subscription) {
             this.subscription = subscription;
             if (System.getSecurityManager() == null) {
                 try {
@@ -228,14 +228,14 @@ public class ResponseSubscribers {
         private final CompletableFuture<T> result = new MinimalFuture<>();
         private final List<ByteBuffer> received = new ArrayList<>();
 
-        private volatile Subscription subscription;
+        private volatile Flow.Subscription subscription;
 
         public ByteArraySubscriber(Function<byte[],T> finisher) {
             this.finisher = finisher;
         }
 
         @Override
-        public void onSubscribe(Subscription subscription) {
+        public void onSubscribe(Flow.Subscription subscription) {
             if (this.subscription != null) {
                 subscription.cancel();
                 return;
@@ -304,7 +304,7 @@ public class ResponseSubscribers {
 
         // A queue of yet unprocessed ByteBuffers received from the flow API.
         private final BlockingQueue<List<ByteBuffer>> buffers;
-        private volatile Subscription subscription;
+        private volatile Flow.Subscription subscription;
         private volatile boolean closed;
         private volatile Throwable failed;
         private volatile Iterator<ByteBuffer> currentListItr;
@@ -365,7 +365,7 @@ public class ResponseSubscribers {
                         }
 
                         // Request another upstream item ( list of buffers )
-                        Subscription s = subscription;
+                        Flow.Subscription s = subscription;
                         if (s != null) {
                             if (debug.on()) debug.log("Increased demand by 1");
                             s.request(1);
@@ -410,7 +410,7 @@ public class ResponseSubscribers {
         }
 
         @Override
-        public void onSubscribe(Subscription s) {
+        public void onSubscribe(Flow.Subscription s) {
             try {
                 if (!subscribed.compareAndSet(false, true)) {
                     s.cancel();
@@ -490,7 +490,7 @@ public class ResponseSubscribers {
 
         @Override
         public void close() throws IOException {
-            Subscription s;
+            Flow.Subscription s;
             synchronized (this) {
                 if (closed) return;
                 closed = true;
@@ -538,7 +538,7 @@ public class ResponseSubscribers {
         }
 
         @Override
-        public void onSubscribe(Subscription subscription) {
+        public void onSubscribe(Flow.Subscription subscription) {
             if (!subscribed.compareAndSet(false, true)) {
                 subscription.cancel();
             } else {
@@ -663,7 +663,7 @@ public class ResponseSubscribers {
         }
 
         @Override
-        public void onSubscribe(Subscription subscription) {
+        public void onSubscribe(Flow.Subscription subscription) {
             upstream.onSubscribe(subscription);
         }
 
@@ -686,7 +686,7 @@ public class ResponseSubscribers {
     // A BodySubscriber that returns a Publisher<List<ByteBuffer>>
     static class PublishingBodySubscriber
             implements BodySubscriber<Flow.Publisher<List<ByteBuffer>>> {
-        private final MinimalFuture<Subscription>
+        private final MinimalFuture<Flow.Subscription>
                 subscriptionCF = new MinimalFuture<>();
         private final MinimalFuture<SubscriberRef>
                 subscribedCF = new MinimalFuture<>();
@@ -709,15 +709,15 @@ public class ResponseSubscribers {
         // The reference is cleared when the subscriber is completed - either
         // normally or exceptionally, or when the subscription is cancelled.
         static final class SubscriberRef {
-            volatile Subscriber<? super List<ByteBuffer>> ref;
-            SubscriberRef(Subscriber<? super List<ByteBuffer>> subscriber) {
+            volatile Flow.Subscriber<? super List<ByteBuffer>> ref;
+            SubscriberRef(Flow.Subscriber<? super List<ByteBuffer>> subscriber) {
                 ref = subscriber;
             }
-            Subscriber<? super List<ByteBuffer>> get() {
+            Flow.Subscriber<? super List<ByteBuffer>> get() {
                 return ref;
             }
-            Subscriber<? super List<ByteBuffer>> clear() {
-                Subscriber<? super List<ByteBuffer>> res = ref;
+            Flow.Subscriber<? super List<ByteBuffer>> clear() {
+                Flow.Subscriber<? super List<ByteBuffer>> res = ref;
                 ref = null;
                 return res;
             }
@@ -726,10 +726,10 @@ public class ResponseSubscribers {
         // A subscription that wraps an upstream subscription and
         // holds a reference to a subscriber. The subscriber reference
         // is cleared when the subscription is cancelled
-        final static class SubscriptionRef implements Subscription {
-            final Subscription subscription;
+        final static class SubscriptionRef implements Flow.Subscription {
+            final Flow.Subscription subscription;
             final SubscriberRef subscriberRef;
-            SubscriptionRef(Subscription subscription,
+            SubscriptionRef(Flow.Subscription subscription,
                             SubscriberRef subscriberRef) {
                 this.subscription = subscription;
                 this.subscriberRef = subscriberRef;
@@ -791,7 +791,7 @@ public class ResponseSubscribers {
             completionCF.complete(null);
         }
 
-        private void subscribe(Subscriber<? super List<ByteBuffer>> subscriber) {
+        private void subscribe(Flow.Subscriber<? super List<ByteBuffer>> subscriber) {
             Objects.requireNonNull(subscriber, "subscriber must not be null");
             SubscriberRef ref = new SubscriberRef(subscriber);
             if (subscriberRef.compareAndSet(null, ref)) {
@@ -810,7 +810,7 @@ public class ResponseSubscribers {
                     }
                 });
             } else {
-                subscriber.onSubscribe(new Subscription() {
+                subscriber.onSubscribe(new Flow.Subscription() {
                     @Override public void request(long n) { }
                     @Override public void cancel() { }
                 });
@@ -820,7 +820,7 @@ public class ResponseSubscribers {
         }
 
         @Override
-        public void onSubscribe(Subscription subscription) {
+        public void onSubscribe(Flow.Subscription subscription) {
             subscriptionCF.complete(subscription);
         }
 
@@ -832,7 +832,7 @@ public class ResponseSubscribers {
                 SubscriberRef ref = subscriberRef.get();
                 // cannot be called before subscriber calls request(1)
                 assert ref != null;
-                Subscriber<? super List<ByteBuffer>>
+                Flow.Subscriber<? super List<ByteBuffer>>
                         subscriber = ref.get();
                 if (subscriber != null) {
                     // may be null if subscription was cancelled.

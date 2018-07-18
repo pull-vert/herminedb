@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Upstream error signals are delivered downstream directly. Cancellation from
  * downstream is also propagated upstream immediately.
  * <p>
- * Each SubscriberWrapper has a {@link CompletableFuture}{@code <Void>}
+ * Each SubscriberWrapper has a {@link java.util.concurrent.CompletableFuture}{@code <Void>}
  * which propagates completion/errors from downstream to upstream. Normal completion
  * can only occur after onComplete() is called, but errors can be propagated upwards
  * at any time.
@@ -260,6 +260,8 @@ public abstract class SubscriberWrapper
             try {
                 run1();
             } catch (Throwable t) {
+                if (debug.on())
+                    debug.log("DownstreamPusher threw: " + t);
                 errorCommon(t);
             }
         }
@@ -292,6 +294,7 @@ public abstract class SubscriberWrapper
                 pushScheduler.stop();
                 outputQ.clear();
                 downstreamSubscriber.onError(error);
+                cf.completeExceptionally(error);
                 return;
             }
 
@@ -383,9 +386,8 @@ public abstract class SubscriberWrapper
                 (throwable = new AssertionError("null throwable")) != null;
         if (errorRef.compareAndSet(null, throwable)) {
             if (debug.on()) debug.log("error", throwable);
-            pushScheduler.runOrSchedule();
             upstreamCompleted = true;
-            cf.completeExceptionally(throwable);
+            pushScheduler.runOrSchedule();
             return true;
         }
         return false;

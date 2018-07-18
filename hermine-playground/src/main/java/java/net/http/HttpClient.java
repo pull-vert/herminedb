@@ -112,12 +112,12 @@ import jdk.internal.net.http.HttpClientBuilderImpl;
  * proxying) and a {@code URL} string of the form {@code "socket://host:port"}
  * where host and port specify the proxy's address.
  *
- * @implNote If an explicit {@linkplain Builder#executor(Executor)
+ * @implNote If an explicit {@linkplain HttpClient.Builder#executor(Executor)
  * executor} has not been set for an {@code HttpClient}, and a security manager
  * has been installed, then the default executor will execute asynchronous and
  * dependent tasks in a context that is granted no permissions. Custom
  * {@linkplain HttpRequest.BodyPublisher request body publishers}, {@linkplain
- * BodyHandler response body handlers}, {@linkplain
+ * HttpResponse.BodyHandler response body handlers}, {@linkplain
  * HttpResponse.BodySubscriber response body subscribers}, and {@linkplain
  * WebSocket.Listener WebSocket Listeners}, if executing operations that require
  * privileges, should do so within an appropriate {@linkplain
@@ -138,7 +138,7 @@ public abstract class HttpClient {
      * <p> Equivalent to {@code newBuilder().build()}.
      *
      * <p> The default settings include: the "GET" request method, a preference
-     * of {@linkplain Version#HTTP_2 HTTP/2}, a redirection policy of
+     * of {@linkplain HttpClient.Version#HTTP_2 HTTP/2}, a redirection policy of
      * {@linkplain Redirect#NEVER NEVER}, the {@linkplain
      * ProxySelector#getDefault() default proxy selector}, and the {@linkplain
      * SSLContext#getDefault() default SSL context}.
@@ -279,7 +279,7 @@ public abstract class HttpClient {
          * @param version the requested HTTP protocol version
          * @return this builder
          */
-        public Builder version(Version version);
+        public Builder version(HttpClient.Version version);
 
         /**
          * Sets the default priority for any HTTP/2 requests sent from this
@@ -293,7 +293,7 @@ public abstract class HttpClient {
         public Builder priority(int priority);
 
         /**
-         * Sets a {@link ProxySelector}.
+         * Sets a {@link java.net.ProxySelector}.
          *
          * @apiNote {@link ProxySelector#of(InetSocketAddress) ProxySelector::of}
          * provides a {@code ProxySelector} which uses a single proxy for all
@@ -347,7 +347,7 @@ public abstract class HttpClient {
     /**
      * Returns the follow redirects policy for this client. The default value
      * for client's built by builders that do not specify a redirect policy is
-     * {@link Redirect#NEVER NEVER}.
+     * {@link HttpClient.Redirect#NEVER NEVER}.
      *
      * @return this client's follow redirects setting
      */
@@ -400,7 +400,7 @@ public abstract class HttpClient {
 
     /**
      * Returns the preferred HTTP protocol version for this client. The default
-     * value is {@link Version#HTTP_2}
+     * value is {@link HttpClient.Version#HTTP_2}
      *
      * @implNote Constraints may also affect the selection of protocol version.
      * For example, if HTTP/2 is requested through a proxy, and if the
@@ -408,7 +408,7 @@ public abstract class HttpClient {
      *
      * @return the HTTP protocol version requested
      */
-    public abstract Version version();
+    public abstract HttpClient.Version version();
 
     /**
      * Returns an {@code Optional} containing this client's {@link
@@ -417,7 +417,7 @@ public abstract class HttpClient {
      *
      * <p> Even though this method may return an empty optional, the {@code
      * HttpClient} may still have an non-exposed {@linkplain
-     * Builder#executor(Executor) default executor} that is used for
+     * HttpClient.Builder#executor(Executor) default executor} that is used for
      * executing asynchronous and dependent tasks.
      *
      * @return an {@code Optional} containing this client's {@code Executor}
@@ -451,7 +451,7 @@ public abstract class HttpClient {
      * where it can be handled manually.
      *
      * <p> {@code Redirect} policy is set through the {@linkplain
-     * Builder#followRedirects(Redirect) Builder.followRedirects}
+     * HttpClient.Builder#followRedirects(Redirect) Builder.followRedirects}
      * method.
      *
      * @implNote When automatic redirection occurs, the request method of the
@@ -497,13 +497,13 @@ public abstract class HttpClient {
      *         a request that could have been validly built as specified by {@link
      *         HttpRequest.Builder HttpRequest.Builder}.
      * @throws SecurityException If a security manager has been installed
-     *          and it denies {@link URLPermission access} to the
+     *          and it denies {@link java.net.URLPermission access} to the
      *          URL in the given request, or proxy if one is configured.
      *          See <a href="#securitychecks">security checks</a> for further
      *          information.
      */
     public abstract <T> HttpResponse<T>
-    send(HttpRequest request, BodyHandler<T> responseBodyHandler)
+    send(HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler)
         throws IOException, InterruptedException;
 
     /**
@@ -540,7 +540,7 @@ public abstract class HttpClient {
      * <ul>
      * <li>{@link IOException} - if an I/O error occurs when sending or receiving</li>
      * <li>{@link SecurityException} - If a security manager has been installed
-     *          and it denies {@link URLPermission access} to the
+     *          and it denies {@link java.net.URLPermission access} to the
      *          URL in the given request, or proxy if one is configured.
      *          See <a href="#securitychecks">security checks</a> for further
      *          information.</li>

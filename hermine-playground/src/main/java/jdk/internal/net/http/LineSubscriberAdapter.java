@@ -123,14 +123,14 @@ public final class LineSubscriberAdapter<S extends Subscriber<? super String>,R>
                 eol);
     }
 
-    static final class LineSubscription implements Subscription {
-        final Subscription upstreamSubscription;
+    static final class LineSubscription implements Flow.Subscription {
+        final Flow.Subscription upstreamSubscription;
         final CharsetDecoder decoder;
         final String newline;
         final Demand downstreamDemand;
         final ConcurrentLinkedDeque<ByteBuffer> queue;
         final SequentialScheduler scheduler;
-        final Subscriber<? super String> upstream;
+        final Flow.Subscriber<? super String> upstream;
         final CompletableFuture<?> cf;
         private final AtomicReference<Throwable> errorRef = new AtomicReference<>();
         private final AtomicLong demanded = new AtomicLong();
@@ -143,10 +143,10 @@ public final class LineSubscriberAdapter<S extends Subscriber<? super String>,R>
         private final StringBuilder builder = new StringBuilder();
         private String nextLine;
 
-        private LineSubscription(Subscription s,
+        private LineSubscription(Flow.Subscription s,
                                  CharsetDecoder dec,
                                  String separator,
-                                 Subscriber<? super String> subscriber,
+                                 Flow.Subscriber<? super String> subscriber,
                                  CompletableFuture<?> completion) {
             downstreamDemand = new Demand();
             queue = new ConcurrentLinkedDeque<>();
@@ -446,10 +446,10 @@ public final class LineSubscriberAdapter<S extends Subscriber<? super String>,R>
             }
         }
 
-        static LineSubscription create(Subscription s,
+        static LineSubscription create(Flow.Subscription s,
                                        Charset charset,
                                        String lineSeparator,
-                                       Subscriber<? super String> upstream,
+                                       Flow.Subscriber<? super String> upstream,
                                        CompletableFuture<?> cf) {
             return new LineSubscription(Objects.requireNonNull(s),
                     Objects.requireNonNull(charset).newDecoder()

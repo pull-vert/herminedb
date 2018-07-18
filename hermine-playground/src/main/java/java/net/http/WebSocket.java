@@ -35,7 +35,7 @@ import java.util.concurrent.CompletionStage;
 /**
  * A WebSocket Client.
  *
- * <p> {@code WebSocket} instances are created through {@link Builder}.
+ * <p> {@code WebSocket} instances are created through {@link WebSocket.Builder}.
  *
  * <p> WebSocket has an input and an output side. These sides are independent
  * from each other. A side can either be open or closed. Once closed, the side

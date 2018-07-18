@@ -132,7 +132,7 @@ public interface HttpResponse<T> {
      * Returns the body. Depending on the type of {@code T}, the returned body
      * may represent the body after it was read (such as {@code byte[]}, or
      * {@code String}, or {@code Path}) or it may represent an object with
-     * which the body is read, such as an {@link InputStream}.
+     * which the body is read, such as an {@link java.io.InputStream}.
      *
      * <p> If this {@code HttpResponse} was returned from an invocation of
      * {@link #previousResponse()} then this method returns {@code null}
@@ -779,9 +779,9 @@ public interface HttpResponse<T> {
          *                 invoked to accept the push promise
          */
         public void applyPushPromise(
-                HttpRequest initiatingRequest,
-                HttpRequest pushPromiseRequest,
-                Function<BodyHandler<T>, CompletableFuture<HttpResponse<T>>> acceptor
+            HttpRequest initiatingRequest,
+            HttpRequest pushPromiseRequest,
+            Function<HttpResponse.BodyHandler<T>,CompletableFuture<HttpResponse<T>>> acceptor
         );
 
 
@@ -818,8 +818,8 @@ public interface HttpResponse<T> {
          * @return a push promise handler
          */
         public static <T> PushPromiseHandler<T>
-        of(Function<HttpRequest, BodyHandler<T>> pushPromiseHandler,
-           ConcurrentMap<HttpRequest, CompletableFuture<HttpResponse<T>>> pushPromisesMap) {
+        of(Function<HttpRequest,BodyHandler<T>> pushPromiseHandler,
+           ConcurrentMap<HttpRequest,CompletableFuture<HttpResponse<T>>> pushPromisesMap) {
             return new PushPromisesHandlerWithMap<>(pushPromiseHandler, pushPromisesMap);
         }
     }
@@ -829,7 +829,7 @@ public interface HttpResponse<T> {
      * into a higher-level Java type.  The class {@link BodySubscribers
      * BodySubscriber} provides implementations of many common body subscribers.
      *
-     * <p> The object acts as a {@link Subscriber}&lt;{@link List}&lt;{@link
+     * <p> The object acts as a {@link Flow.Subscriber}&lt;{@link List}&lt;{@link
      * ByteBuffer}&gt;&gt; to the HTTP Client implementation, which publishes
      * lists of ByteBuffers containing the response body. The Flow of data, as
      * well as the order of ByteBuffers in the Flow lists, is a strictly ordered
@@ -844,17 +844,17 @@ public interface HttpResponse<T> {
      * it completes depends on the nature of type {@code T}. In many cases,
      * when {@code T} represents the entire body after being consumed then
      * the {@code CompletionStage} completes after the body has been consumed.
-     * If  {@code T} is a streaming type, such as {@link InputStream
+     * If  {@code T} is a streaming type, such as {@link java.io.InputStream
      * InputStream}, then it completes before the body has been read, because
      * the calling code uses the {@code InputStream} to consume the data.
      *
      * @apiNote To ensure that all resources associated with the corresponding
      * HTTP exchange are properly released, an implementation of {@code
-     * BodySubscriber} should ensure to {@link Subscription#request
+     * BodySubscriber} should ensure to {@link Flow.Subscription#request
      * request} more data until one of {@link #onComplete() onComplete} or
      * {@link #onError(Throwable) onError} are signalled, or {@link
-     * Subscription#request cancel} its {@linkplain
-     * #onSubscribe(Subscription) subscription} if unable or unwilling to
+     * Flow.Subscription#request cancel} its {@linkplain
+     * #onSubscribe(Flow.Subscription) subscription} if unable or unwilling to
      * do so. Calling {@code cancel} before exhausting the response body data
      * may cause the underlying HTTP connection to be closed and prevent it
      * from being reused for subsequent operations.
@@ -867,12 +867,12 @@ public interface HttpResponse<T> {
      * @since 11
      */
     public interface BodySubscriber<T>
-            extends Subscriber<List<ByteBuffer>> {
+            extends Flow.Subscriber<List<ByteBuffer>> {
 
         /**
          * Returns a {@code CompletionStage} which when completed will return
          * the response body object. This method can be called at any time
-         * relative to the other {@link Subscriber} methods and is invoked
+         * relative to the other {@link Flow.Subscriber} methods and is invoked
          * using the client's {@link HttpClient#executor() executor}.
          *
          * @return a CompletionStage for the response body
@@ -1113,7 +1113,7 @@ public interface HttpResponse<T> {
         /**
          * Returns a {@code BodySubscriber} which provides the incoming body
          * data to the provided Consumer of {@code Optional<byte[]>}. Each
-         * call to {@link Consumer#accept(Object) Consumer.accept()}
+         * call to {@link Consumer#accept(java.lang.Object) Consumer.accept()}
          * will contain a non empty {@code Optional}, except for the final
          * invocation after all body data has been read, when the {@code
          * Optional} will be empty.
@@ -1188,7 +1188,7 @@ public interface HttpResponse<T> {
 
         /**
          * Returns a response subscriber which publishes the response body
-         * through a {@link Publisher Publisher<List<ByteBuffer>>}.
+         * through a {@code Publisher<List<ByteBuffer>>}.
          *
          * <p> The {@link HttpResponse} using this subscriber is available
          * immediately after the response headers have been read, without
