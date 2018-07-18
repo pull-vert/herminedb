@@ -14,7 +14,7 @@ import java.nio.channels.Selector
 internal class TcpClientImpl(
         builder: TcpClientBuilderImpl,
         facadeFactory: SingleFacadeFactory
-) : HermineTcpClient() {
+) : HermineTcpClient {
 
     private val clientIds = atomic(0L)
     private val id: Long = clientIds.incrementAndGet()

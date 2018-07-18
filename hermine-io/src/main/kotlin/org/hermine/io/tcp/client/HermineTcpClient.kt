@@ -33,7 +33,7 @@ public fun newHermineTcpClient() = newBuilder().build()
  */
 fun newBuilder(): HermineTcpClient.Builder = TcpClientBuilderImpl()
 
-abstract class HermineTcpClient protected constructor() {
+interface HermineTcpClient {
     /**
      * A builder of {@linkplain HermineTcpClient Hermine DB}.
      *

@@ -12,7 +12,7 @@ import org.hermine.io.tcp.client.HermineTcpClient
  * An [TcpClientFacade] is a simple class that wraps an [TcpClientImpl] implementation
  * and delegates everything to its implementation delegate.
  */
-internal class TcpClientFacade(val delegate: TcpClientImpl) : HermineTcpClient() {
+internal class TcpClientFacade(val delegate: TcpClientImpl) : HermineTcpClient by delegate {
 
     override fun toString(): String {
         return delegate.toString()
