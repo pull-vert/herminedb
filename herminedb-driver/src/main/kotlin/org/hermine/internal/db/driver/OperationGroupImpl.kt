@@ -11,6 +11,7 @@ import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.future.asDeferred
+import kotlinx.coroutines.experimental.joinChildren
 import mu.KotlinLogging
 import java.time.Duration
 import java.util.concurrent.CompletionStage
@@ -203,7 +204,10 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
     override suspend fun operate(): T? {
         logger.debug { "OperationGroupImpl#operate" }
         return if (condition.await()) {
-            held.await() // wait until submit or releaseProhibitingMoreMembers
+            held.join() // wait until submit or releaseProhibitingMoreMembers
+            // wait for all children to complete
+            parentJob.joinChildren()
+
             (collector.finisher() as Function<Any?, Any>)
                     .apply(accumulator) as T
         } else {
@@ -215,8 +219,8 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
 
     private fun startOpJobs() {
         for ((index, opJob) in parentJob.children.withIndex()) {
-            logger.debug { "start $index child operation job" }
-            opJob.start() // true if job was not started, false if job was started or completed
+            val start = opJob.start() // true if job was not started, false if job was already started or completed
+            logger.debug { "start $index child operation job = $start" }
         }
     }
 }

@@ -130,7 +130,7 @@ internal abstract class AbstractOperation<T> : Operation<T> {
                 else throw SqlSkippedException("TODO", ex, null, -1, null, -1)
             }
         }) {
-            if (!parallel) predecessor?.await()
+            if (!parallel) predecessor?.join()
             operate()
         }
     }
