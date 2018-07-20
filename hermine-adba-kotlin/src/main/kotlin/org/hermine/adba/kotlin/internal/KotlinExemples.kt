@@ -13,7 +13,7 @@ import org.hermine.adba.kotlin.getAt
 import org.hermine.adba.kotlin.newDataSourceFactory
 
 private fun getDataSource(url: String, user: String, pass: String): DataSource {
-    return newDataSourceFactory<DataSourceFactory>("example.DataSourceFactory") // top level function
+    return newDataSourceFactory<DataSourceFactory>() // top level function
             .builder()
             .url(url)
             .username(user)

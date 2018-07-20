@@ -36,7 +36,7 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
     // used only by Session. Will break if used by any other class.
     constructor() : super()
 
-    constructor(session: SessionImpl, group: OperationGroupImpl<in T, *>) : super(session, group)
+    constructor(session: SessionImpl, group: OperationGroupImpl<T, *>) : super(session, group)
 
     protected var condition: Deferred<Boolean> = DEFAULT_CONDITION
 
@@ -94,7 +94,7 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
         if (isImmutable() || !isHeld()) throw IllegalStateException("TODO")  //TODO prevent multiple calls
         accumulator = collector.supplier().get()
         submission = super.submit()
-        // start all operations
+        // start all already added operations
         startOpJobs()
         return submission
     }
@@ -114,6 +114,7 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
         if (!isHeld()) throw IllegalStateException("TODO")
         if (sql == null) throw IllegalArgumentException("TODO")
         throw UnsupportedOperationException("Not supported yet.")
+//        return ParameterizedRowCountOperationImpl(session, this, sql)
     }
 
     override fun operation(sql: String?): AbstractOperation<S> {

@@ -9,7 +9,7 @@ package org.hermine.adba.kotlin
 import jdk.incubator.sql2.DataSourceFactory
 import jdk.incubator.sql2.Result
 
-fun <T : DataSourceFactory> newDataSourceFactory(name: String): T = DataSourceFactory.newFactory(name) ?: throw ClassNotFoundException("DataSourceFactory $name not found")
+inline fun <reified T : DataSourceFactory> newDataSourceFactory(): T = DataSourceFactory.newFactory(T::class.qualifiedName) ?: throw ClassNotFoundException("DataSourceFactory ${T::class.qualifiedName} could not be loaded by ServiceLoade")
 
 inline fun <reified T : Any> Result.Column.getAt(id: String) = at(id).get(T::class.java)
 

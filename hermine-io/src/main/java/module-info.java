@@ -5,7 +5,8 @@
  */
 
 module org.hermine.io {
-    requires kotlin.stdlib;
     requires atomicfu;
+    requires kotlin.stdlib;
+    requires kotlinx.coroutines.core;
     exports org.hermine.io.tcp.client;
 }

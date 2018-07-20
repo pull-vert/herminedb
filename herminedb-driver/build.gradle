@@ -12,6 +12,9 @@ repositories {
 
 dependencies {
     compile("jdk.incubator:adba:$adba_version")
+    compile project(':hermine-io')
+
+    runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
 
     testCompile project(':hermine-adba-kotlin')
 }

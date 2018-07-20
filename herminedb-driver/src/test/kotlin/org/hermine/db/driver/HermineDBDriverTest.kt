@@ -7,9 +7,9 @@
 package org.hermine.db.driver
 
 import jdk.incubator.sql2.AdbaType
-import jdk.incubator.sql2.DataSourceFactory
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
+import org.hermine.adba.kotlin.newDataSourceFactory
 import org.junit.jupiter.api.Disabled
 import kotlin.test.Test
 
@@ -27,7 +27,7 @@ class HermineDBDriverTest {
     @Disabled
     fun `Verify that DataSourceFactory#forName works, Can't do anything without that`() {
         // When
-        val name = DataSourceFactory.newFactory<DataSourceFactory>(FACTORY_NAME).javaClass.name
+        val name = newDataSourceFactory<HermineDataSourceFactory>().javaClass.name
 
         // Then
         assertThat(name)
