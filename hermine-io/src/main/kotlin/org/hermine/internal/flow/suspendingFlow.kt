@@ -13,8 +13,14 @@ interface Source<out E> {
 }
 
 interface Sink<in E> {
+    fun onConsume(consumer: Consumer)
     suspend fun send(item: E)
     fun close(cause: Throwable?)
+}
+
+interface Consumer {
+    fun request(n: Long)
+    fun cancel()
 }
 
 fun <E> Source<E>.toPublisher() = Flow.Publisher<E> { subscriber ->
