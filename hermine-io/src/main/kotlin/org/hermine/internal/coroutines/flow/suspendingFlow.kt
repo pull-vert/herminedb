@@ -1,4 +1,4 @@
-package org.hermine.internal.flow
+package org.hermine.internal.coroutines.flow
 
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.experimental.*
