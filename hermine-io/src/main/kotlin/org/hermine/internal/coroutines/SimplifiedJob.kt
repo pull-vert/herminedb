@@ -120,7 +120,7 @@ internal open class SimplifiedJob : Job {
             return state.isCancelled
         }
 
-    public final override fun start() = false // started by default
+    public final override fun start() = false // already started by default
 
     public final override fun getCancellationException(): CancellationException {
         val state = this.state
@@ -173,7 +173,6 @@ internal open class SimplifiedJob : Job {
  * A specific subclass of [CompletedExceptionally] for cancelled jobs.
  *
  * **Note: This class cannot be used outside of internal coroutines framework**.
- * TODO rename to CancelledJob?
  *
  * @param job the job that was cancelled.
  * @param cause the exceptional completion cause. If `cause` is null, then a [JobCancellationException] is created.
