@@ -1,7 +1,5 @@
 /*
- * Copyright 2018 HermineDB's author : Frédéric Montariol
- * and explicitly declared author of each file if specified.
- * Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2018 HermineDB's author : Frédéric Montariol. Use of this source code is governed by the Apache 2.0 license.
  */
 
 package org.hermine.adba.kotlin
