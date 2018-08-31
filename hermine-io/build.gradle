@@ -5,5 +5,5 @@
 ext.moduleName='org.hermine.io'
 
 dependencies {
-    compile("org.jetbrains.kotlinx:kotlinx-coroutines-io:$kotlinx_coroutines_version")
+    compile("org.jetbrains.kotlinx:kotlinx-coroutines-io:$kotlinx_io_version")
 }

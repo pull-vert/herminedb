@@ -201,8 +201,8 @@ configure(subprojects.findAll { !noModule.contains(it.name) }) {
     }
 }
 
-// use ./gradlew wrapper when version change
+// execute ./gradlew wrapper then remove .gradle directory when version change
 wrapper {
-    gradleVersion = '4.9'
+    gradleVersion = '4.10'
     distributionType = Wrapper.DistributionType.ALL
 }
