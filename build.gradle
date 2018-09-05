@@ -83,13 +83,13 @@ configure(subprojects.findAll { useAtomicFu.contains(it.name) }) {
 
     dependencies {
         compileOnly "org.jetbrains.kotlinx:atomicfu:$atomicFU_version"
-        testCompile "org.jetbrains.kotlinx:atomicfu:$atomicFU_version"
+        testRuntime "org.jetbrains.kotlinx:atomicfu:$atomicFU_version"
     }
 
     task copyModuleInfo(type: Copy) {
         from "$buildDir/classes/java/main"
         include 'module-info.class'
-        into "$buildDir/classes-atomicfu/main"
+        into "$buildDir/classes/main-transformed"
     }
 
     copyModuleInfo.dependsOn compileKotlin
@@ -99,26 +99,10 @@ configure(subprojects.findAll { useAtomicFu.contains(it.name) }) {
     }
 
     deleteModuleInfo.dependsOn copyModuleInfo
+    classes.dependsOn deleteModuleInfo
 
-    atomicFU {
-        inputFiles = sourceSets.main.output.classesDirs
-        outputDir = file("$buildDir/classes-atomicfu/main")
-        classPath = sourceSets.main.runtimeClasspath
+    atomicfu {
         variant = "VH" // "FU" for AtomicXXUpdater, "VH" to use Java 9 VarHandle
-    }
-
-    atomicFU.dependsOn deleteModuleInfo
-    testClasses.dependsOn atomicFU
-    jar.dependsOn atomicFU
-
-    jar {
-        mainSpec.sourcePaths.clear() // hack to clear existing paths
-        from files(atomicFU.outputs, sourceSets.main.output.resourcesDir)
-    }
-
-    test {
-        classpath = files(configurations.testRuntime, atomicFU.outputs, sourceSets.test.output.classesDirs,
-                sourceSets.main.output.resourcesDir)
     }
 }
 
