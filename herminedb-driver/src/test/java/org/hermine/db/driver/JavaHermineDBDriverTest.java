@@ -62,6 +62,7 @@ public class JavaHermineDBDriverTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("Verify that can create a Session. Should work even if there is no database.")
     public void createSession() {
         // Given

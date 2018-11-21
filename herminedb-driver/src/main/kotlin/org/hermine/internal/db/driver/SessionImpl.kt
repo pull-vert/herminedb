@@ -9,7 +9,7 @@ import jdk.incubator.sql2.Session.Lifecycle
 import java.time.Duration
 import java.util.function.Consumer
 import java.util.function.LongConsumer
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.CoroutineContext
 
 internal class SessionImpl(
         dataSource: DataSourceImpl,
@@ -77,11 +77,7 @@ internal class SessionImpl(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun activate(): Session {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun deactivate(): Session {
+    override fun close() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

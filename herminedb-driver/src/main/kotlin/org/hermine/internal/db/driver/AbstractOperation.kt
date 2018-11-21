@@ -8,16 +8,13 @@ import jdk.incubator.sql2.AdbaType
 import jdk.incubator.sql2.Operation
 import jdk.incubator.sql2.SqlSkippedException
 import jdk.incubator.sql2.SqlType
-import kotlinx.coroutines.experimental.CoroutineStart
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import java.math.BigInteger
 import java.time.*
 import java.time.temporal.ChronoUnit
 import java.util.function.Consumer
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.CoroutineContext
 
 // Place definition above class declaration to make field static
 private val logger = KotlinLogging.logger {}
@@ -117,17 +114,17 @@ internal abstract class AbstractOperation<T> : Operation<T> {
             independent: Boolean,
             parent: Job
     ): Deferred<T?> {
-        return async(context, parent = parent, start = CoroutineStart.LAZY, onCompletion = {
+        return GlobalScope.async(context, start = CoroutineStart.LAZY/*, onCompletion = {
             it?.let {
                 // If not independant AND parent is not Cancelled then cancel the parent to Cancel all other Children operations
-                if (!independent && !parent.isCancelled) parent.cancel(it)
+                if (!independent && !parent.isCancelled) parent.cancel()
 
                 val ex = it.unwrapException()
                 errorHandler?.invoke(it)
                 if (ex is SqlSkippedException) throw ex
                 else throw SqlSkippedException("TODO", ex, null, -1, null, -1)
             }
-        }) {
+        }*/) {
             if (!parallel) predecessor?.join()
             operate()
         }

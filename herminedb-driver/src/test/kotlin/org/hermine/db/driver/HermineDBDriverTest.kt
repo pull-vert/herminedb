@@ -53,6 +53,7 @@ class HermineDBDriverTest {
                 .isNotNull()
     }
 
+    @Disabled
     @Test
     fun `Verify that can create a Session, Should work even if there is no database`() {
         // Given

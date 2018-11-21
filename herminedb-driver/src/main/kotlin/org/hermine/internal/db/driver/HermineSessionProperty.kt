@@ -5,15 +5,15 @@
 package org.hermine.internal.db.driver
 
 import jdk.incubator.sql2.SessionProperty
-import kotlinx.coroutines.experimental.DefaultDispatcher
+import kotlinx.coroutines.Dispatchers
 import java.util.function.Function
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.CoroutineContext
 
 internal object CONTEXT : HermineSessionProperty(
         "CONTEXT",
         CoroutineContext::class.java,
         Function { v -> v is CoroutineContext },
-        DefaultDispatcher,
+        Dispatchers.Default,
         false)
 
 internal abstract class HermineSessionProperty(

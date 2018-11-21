@@ -5,7 +5,7 @@
 package org.hermine.internal.db.driver
 
 import jdk.incubator.sql2.Submission
-import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.Deferred
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
 

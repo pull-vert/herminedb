@@ -5,11 +5,10 @@
 package org.hermine.internal.db.driver
 
 import jdk.incubator.sql2.*
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.future.asDeferred
-import kotlinx.coroutines.experimental.joinChildren
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.future.asDeferred
 import mu.KotlinLogging
 import java.time.Duration
 import java.util.concurrent.CompletionStage
@@ -87,16 +86,6 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
         return this
     }
 
-    override fun submitHoldingForMoreMembers(): SubmissionImpl<T> {
-        logger.debug { "OperationGroupImpl#submitHoldingForMoreMembers" }
-        if (isImmutable() || !isHeld()) throw IllegalStateException("TODO")  //TODO prevent multiple calls
-        accumulator = collector.supplier().get()
-        submission = super.submit()
-        // start all already added operations
-        startOpJobs()
-        return submission
-    }
-
     override fun catchOperation(): AbstractOperation<S> {
         if (!isHeld()) throw IllegalStateException("TODO")
         throw UnsupportedOperationException("Not supported yet.")
@@ -159,16 +148,6 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
         throw UnsupportedOperationException("Will use other Logger")
     }
 
-    override fun releaseProhibitingMoreMembers(): SubmissionImpl<T> {
-        logger.debug { "OperationGroupImpl#releaseProhibitingMoreMembers" }
-        if (!isImmutable() || !isHeld()) throw IllegalStateException("TODO")
-        // start all operations
-        startOpJobs()
-        held.complete(Unit)
-        immutable()  // having set isHeld to false this call will make this OpGrp immutable
-        return submission
-    }
-
     // Override Operation methods
 
     override fun timeout(minTime: Duration): OperationGroupImpl<S, T> {
@@ -191,6 +170,10 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
         return super.submit()
     }
 
+    override fun close() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     // Internal methods
 
     internal fun submitOperation(op: AbstractOperation<S>): SubmissionImpl<S> {
@@ -204,8 +187,6 @@ internal open class OperationGroupImpl<S, T> : AbstractOperation<T>, OperationGr
         logger.debug { "OperationGroupImpl#operate" }
         return if (condition.await()) {
             held.join() // wait until submit or releaseProhibitingMoreMembers
-            // wait for all children to complete
-            parentJob.joinChildren()
 
             (collector.finisher() as Function<Any?, Any>)
                     .apply(accumulator) as T

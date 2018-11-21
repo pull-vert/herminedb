@@ -4,8 +4,8 @@
 
 package org.hermine.internal.db.driver
 
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.future.asCompletableFuture
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.future.asCompletableFuture
 import java.util.concurrent.CompletionStage
 
 class DeferredCompletionStage<T>(delegate: Deferred<T>) : Deferred<T> by delegate, CompletionStage<T> by delegate.asCompletableFuture()
